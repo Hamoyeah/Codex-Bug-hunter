@@ -56,9 +56,9 @@ def read(path):
 # (file, regex with one capture group per checked number, key or tuple of keys
 # into the `actual` dict, human label for error messages)
 CHECKS = [
-    ("README.md", r"contains \*\*(\d+) skills\*\*", "total", "Codex distribution skill count"),
-    ("README.md", r"retains \*\*(\d+) slash commands\*\*", "commands", "compatibility command count"),
-    ("README.md", r"includes \*\*(\d+) `hunt-\*` skills\*\*", "hunt", "hunt skill count"),
+    ("README.md", r"총 \*\*(\d+)개 스킬\*\*", "total", "Codex distribution skill count"),
+    ("README.md", r"Claude Code 호환용 \*\*(\d+)개 slash commands\*\*", "commands", "compatibility command count"),
+    ("README.md", r"\*\*(\d+)개는 `hunt-\*` 스킬\*\*", "hunt", "hunt skill count"),
     ("SECURITY.md", r"installing (\d+) `SKILL\.md` files", "total", "supply-chain-trust intro"),
     ("USAGE.md", r"the (\d+)-skill Codex-Bug-hunter bundle", "total", "doc intro"),
     ("USAGE.md", r"copies (\d+) skills into ~/\.agents/skills", "total", "Codex quickstart code block"),

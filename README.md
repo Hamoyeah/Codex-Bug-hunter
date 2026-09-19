@@ -1,26 +1,13 @@
-![Codex-Bug-hunter banner](assets/banner-v2.svg)
-
 # Codex-Bug-hunter
 
-Codex-first Agent Skills and deterministic tooling for authorized bug-bounty,
-web application security, recon, validation, and external red-team work.
+OpenAI Codex에서 사용할 수 있는 버그바운티 및 웹 보안 점검용 Agent Skills 모음입니다.
 
-This distribution contains **84 skills**, a `$bughunter` workflow router, the
-`cbh` command-line runner, guarded engagement workflows, and optional Burp MCP
-integration. It also retains **15 slash commands** for Claude Code compatibility.
-It is designed to work immediately after a clone and Codex-only installation.
+정찰, 취약점 분류, 검증, 증거 정리, 보고서 작성 흐름을 `$bughunter` 하나로 실행할 수 있습니다.
 
-> Use this project only on assets you own or have explicit permission to test.
-> Recon results never expand the authorized scope automatically, and
-> state-changing proof-of-concept actions require operator approval.
+> 본인이 소유했거나 명시적으로 허가받은 대상에서만 사용하세요.
+> 수집 과정에서 새로 발견한 도메인은 자동으로 허용 범위에 포함되지 않습니다.
 
-This repository is maintained at
-[`Hamoyeah/Codex-Bug-hunter`](https://github.com/Hamoyeah/Codex-Bug-hunter).
-It is based on
-[`elementalsouls/Claude-BugHunter`](https://github.com/elementalsouls/Claude-BugHunter);
-upstream authorship, licenses, and content attribution are preserved.
-
-## Quick start with Codex
+## 설치
 
 ### Windows PowerShell
 
@@ -30,7 +17,7 @@ cd Codex-Bug-hunter
 powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexOnly
 ```
 
-### macOS or Linux
+### macOS / Linux
 
 ```bash
 git clone https://github.com/Hamoyeah/Codex-Bug-hunter.git
@@ -38,8 +25,9 @@ cd Codex-Bug-hunter
 bash scripts/install.sh --codex-only
 ```
 
-Start a new Codex thread after installation so the skill index is refreshed.
-Then invoke the router explicitly:
+설치가 끝나면 Codex를 새로 시작하세요. 스킬은 `~/.agents/skills`에 설치됩니다.
+
+## 사용법
 
 ```text
 $bughunter recon example.com
@@ -48,42 +36,32 @@ $bughunter triage
 $bughunter report
 ```
 
-You can also ask naturally:
+명령 대신 자연어로 요청해도 됩니다.
 
 ```text
-I am authorized to test example.com. Map the attack surface, remain inside
-that exact scope, and rank the most promising areas for manual review.
+example.com은 점검 허가를 받은 대상이야.
+이 도메인 범위 안에서만 정찰하고 공격 표면을 우선순위별로 정리해줘.
 ```
 
-The Codex-only installer copies the skills to `~/.agents/skills`, does not write
-to `~/.claude`, and does not modify your shell profile.
+## 포함된 기능
 
-## What is included
+- 총 **84개 스킬**
+- 이 중 **58개는 `hunt-*` 스킬**
+- Codex용 `$bughunter` 워크플로 라우터
+- 정찰 및 분류용 `cbh` CLI
+- 재개 가능한 engagement engine
+- 범위 검사와 검증 절차
+- 선택적 Burp MCP 연동
+- Claude Code 호환용 **15개 slash commands**
 
-| Component | Purpose |
-|---|---|
-| `skills/bughunter` | Codex workflow router for recon, hunt, validation, reporting, and memory operations |
-| `skills/hunt-*` | Vulnerability-class and framework-specific testing guidance |
-| `skills/web2-recon` | Scope-aware web reconnaissance workflow |
-| `cbh` | Deterministic terminal runner for recon, classification, triage, and reports |
-| `engine` | Resumable engagement orchestration and provider-aware LLM dispatch |
-| `commands` | Legacy Claude Code slash-command compatibility layer |
-| `.codex-plugin` | Codex plugin metadata |
+`subfinder`, `httpx`, `katana`, `gau`, Burp 등이 설치되어 있으면 더 넓게 수집하며,
+없어도 기본 기능은 실행됩니다.
 
-The skill set includes **58 `hunt-*` skills** and covers recon and OSINT,
-common web vulnerability classes, GraphQL, OAuth, JWT, cloud and enterprise
-perimeter review, evidence hygiene, validation gates, and platform-aware reporting. See the
-[skill catalog](docs/skills.md) for the complete list.
-
-## `cbh` command-line runner
-
-Install the CLI directly from the repository:
+## CLI
 
 ```bash
 pipx install git+https://github.com/Hamoyeah/Codex-Bug-hunter.git
 ```
-
-Examples:
 
 ```bash
 cbh recon example.com
@@ -91,93 +69,22 @@ cbh surface example.com
 cbh triage
 ```
 
-The CLI is deterministic and can be used without an LLM. Optional tools such
-as `subfinder`, `httpx`, `katana`, `gau`, and Burp improve coverage when they
-are installed, but the core workflow degrades gracefully when they are absent.
+## 문서
 
-See [`docs/cbh-cli.md`](docs/cbh-cli.md) for commands and output formats.
+- [설치 안내](INSTALL.md)
+- [사용 안내](USAGE.md)
+- [스킬 목록](docs/skills.md)
+- [CLI 안내](docs/cbh-cli.md)
+- [보안 정책](SECURITY.md)
 
-## Optional Burp MCP integration
+## 출처 및 라이선스
 
-If Burp Suite and its MCP server extension are already installed, register the
-server with Codex:
+이 프로젝트는
+[`elementalsouls/Claude-BugHunter`](https://github.com/elementalsouls/Claude-BugHunter)를
+Codex에서 사용할 수 있도록 수정한 배포판입니다.
 
-```bash
-codex mcp add burp -- java -jar /path/to/mcp-proxy-all.jar
-codex mcp list
-```
+원본 저작자와 외부 자료에 대한 표기는 [`NOTICE`](NOTICE)와
+[`docs/credits.md`](docs/credits.md)에 유지되어 있습니다.
 
-Burp is optional. Direct, scope-checked HTTP requests and the deterministic CLI
-remain available without it. Never commit cookies, tokens, raw HAR files, or
-unredacted screenshots.
-
-## Other agent runtimes
-
-Codex is the primary supported experience. The underlying `SKILL.md` files use
-the portable Agent Skills format, and the installers retain optional support
-for Claude Code, OpenCode, Hermes Agent, and Google AntiGravity.
-
-```bash
-bash scripts/install.sh --all
-```
-
-```powershell
-pwsh ./scripts/install.ps1 -All
-```
-
-Claude Code users can still use the compatibility plugin and slash commands,
-but those are not required for Codex. See
-[`docs/multi-harness.md`](docs/multi-harness.md) for the compatibility matrix.
-
-## Project layout
-
-```text
-Codex-Bug-hunter/
-|-- skills/                 Agent Skills, including the BugHunter router
-|-- engine/                 Engagement engine and recon pipeline
-|-- cbh/                    Terminal CLI package
-|-- commands/               Claude Code compatibility commands
-|-- scripts/                Installers, validators, and helper scripts
-|-- docs/                   Architecture and operator documentation
-|-- .codex-plugin/          Codex plugin manifest
-`-- AGENTS.md               Repository-level Codex instructions
-```
-
-## Safety model
-
-- Establish an explicit allowlist before active requests.
-- Deny rules always take precedence over allow rules.
-- Re-check scope after redirects and before each new tool action.
-- Do not treat discovered hosts as authorized automatically.
-- Keep destructive, state-changing, or high-volume actions behind explicit
-  operator approval.
-- Never submit reports automatically.
-- Redact credentials, session material, personal data, and raw evidence before
-  sharing it.
-
-Read [`SECURITY.md`](SECURITY.md) before using the project against a live
-target.
-
-## Documentation
-
-- [Installation guide](INSTALL.md)
-- [Usage guide](USAGE.md)
-- [Architecture](docs/architecture.md)
-- [Skill catalog](docs/skills.md)
-- [`cbh` CLI](docs/cbh-cli.md)
-- [Recon manifest](docs/recon-manifest.md)
-- [Contributing](CONTRIBUTING.md)
-
-## Attribution and license
-
-The Codex adaptation is derived from Claude-BugHunter by Sachin Sharma
-([ElementalSoul](https://github.com/elementalsouls)). Vendored and
-community-derived material is documented in [`NOTICE`](NOTICE) and
-[`docs/credits.md`](docs/credits.md).
-
-- Source code is licensed under the [MIT License](LICENSE).
-- Documentation and methodology content are licensed under
-  [CC BY 4.0](LICENSE-CONTENT).
-
-When redistributing the content, retain the required upstream attribution and
-license notices.
+- 소스 코드: [MIT](LICENSE)
+- 문서 및 방법론 콘텐츠: [CC BY 4.0](LICENSE-CONTENT)
