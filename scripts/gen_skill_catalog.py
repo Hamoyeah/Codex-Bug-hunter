@@ -7,7 +7,8 @@ adding/editing skills:
 
     python3 scripts/gen_skill_catalog.py
 
-Reads name/description/report_count from each skills/<name>/SKILL.md and writes a
+Reads name/description from each skills/<name>/SKILL.md, reads report_count from
+metadata/skill-provenance.json, and writes a
 searchable, grouped catalog page (Jekyll front matter included for the docs site).
 Stdlib only.
 """

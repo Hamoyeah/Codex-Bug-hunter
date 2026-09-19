@@ -15,6 +15,9 @@
   "bugcrowd-reporting": {
     "sources": "bugcrowd, community"
   },
+  "bughunter": {
+    "sources": "provider-workflow-router, commands"
+  },
   "cloud-iam-deep": {
     "sources": "aws-iam-docs, azure-rbac-docs, gcp-iam-docs, hackingthe.cloud, pacu, peirates, prowler, rhinosecuritylabs_research, hackerone_public",
     "report_count": 6

@@ -10,6 +10,7 @@ actions require explicit operator approval, and reports are never submitted auto
 
 When changing a workflow command, update its matching file under
 `skills/bughunter/references/commands/`. Keep every skill description at 1024 characters or
-less and use only supported Agent Skills frontmatter keys. Run the plugin validator, skill
+less and use only supported Agent Skills frontmatter keys. Store grounding sources and hunt
+report counts in `metadata/skill-provenance.json`. Run the plugin validator, skill
 validator, document-count check, Python compile check, engine mock run, and shell syntax
 checks before release.

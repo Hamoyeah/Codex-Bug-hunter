@@ -10,7 +10,11 @@ Checks per skills/<name>/SKILL.md:
     - frontmatter block present (between the first two `---` lines)
     - `name` present, matches ^[a-z0-9-]+$, and equals the directory name
     - `description` present and <= 1024 chars
+    - frontmatter contains only Agent Skills-compatible keys
     - body (everything after frontmatter) <= 500 lines
+  GROUNDING (errors)
+    - `metadata/skill-provenance.json` contains `sources` for every skill
+    - every hunt-* entry also contains a non-negative integer `report_count`
   SAFETY (errors)
     - client-identifier denylist: hashes every 1- and 2-word shingle of the file
       and compares against scripts/.identifier-denylist.sha256 (+ optional
@@ -27,6 +31,7 @@ Usage:
     python3 scripts/lint_skills.py skills/hunt-xss  # lint specific dirs
 """
 import hashlib
+import json
 import os
 import re
 import sys
@@ -34,15 +39,16 @@ import sys
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKILLS_DIR = os.path.join(REPO, "skills")
 SCRIPTS_DIR = os.path.join(REPO, "scripts")
+PROVENANCE_PATH = os.path.join(REPO, "metadata", "skill-provenance.json")
 
 NAME_RE = re.compile(r"^[a-z0-9-]+$")
 MAX_DESC = 1024
 MAX_BODY_LINES = 500
+ALLOWED_FRONTMATTER = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
 
-# Grounding enforcement. Every skill must declare `sources:`; hunt-* skills (built
-# from disclosed reports) must also declare an integer `report_count:` (0 is fine
-# when `sources:` justifies it — e.g. a pattern library or research-derived skill).
-# Phase 4a shipped this as WARNINGS while the backfill landed; now enforced as errors.
+# Grounding is stored outside SKILL.md frontmatter because Agent Skills clients
+# reject non-standard top-level keys. Every skill must have `sources` in the
+# provenance sidecar; hunt-* entries must also have an integer `report_count`.
 GROUNDING_STRICT = True
 
 # --- real-secret patterns (kept tight to avoid flagging documented regexes) ---
@@ -87,6 +93,16 @@ def load_denylist():
                 if name and not name.startswith("#"):
                     hashes.add(hashlib.sha256(name.encode()).hexdigest())
     return hashes
+
+
+def load_provenance():
+    """Return the provider-neutral grounding sidecar keyed by skill name."""
+    try:
+        with open(PROVENANCE_PATH, encoding="utf-8") as fh:
+            data = json.load(fh)
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
 
 
 def shingles(text):
@@ -144,7 +160,7 @@ def yaml_safety_errors(name, raw):
     return errs
 
 
-def lint_skill(skill_dir, denylist):
+def lint_skill(skill_dir, denylist, provenance):
     errors, warnings = [], []
     name = os.path.basename(skill_dir.rstrip("/"))
     path = os.path.join(skill_dir, "SKILL.md")
@@ -157,6 +173,9 @@ def lint_skill(skill_dir, denylist):
     if fm_err:
         errors.append(f"{name}: {fm_err}")
     errors += yaml_safety_errors(name, raw)
+    unsupported = sorted(set(fm) - ALLOWED_FRONTMATTER)
+    if unsupported:
+        errors.append(f"{name}: unsupported Agent Skills frontmatter key(s): {', '.join(unsupported)}")
     # name
     fn = fm.get("name", "")
     if not fn:
@@ -181,16 +200,18 @@ def lint_skill(skill_dir, denylist):
     if body_lines > MAX_BODY_LINES:
         warnings.append(f"{name}: body {body_lines} lines > {MAX_BODY_LINES} guideline (use references/ subfolder)")
 
-    # grounding: every skill declares `sources:`; hunt-* also declares report_count.
+    # grounding: every skill has sidecar sources; hunt-* also has report_count.
     grounding = errors if GROUNDING_STRICT else warnings
-    if not fm.get("sources", "").strip():
-        grounding.append(f"{name}: missing `sources:` — declare grounding provenance in frontmatter")
+    provenance_entry = provenance.get(name, {})
+    sources = provenance_entry.get("sources") if isinstance(provenance_entry, dict) else None
+    if not isinstance(sources, str) or not sources.strip():
+        grounding.append(f"{name}: missing `sources` in metadata/skill-provenance.json")
     if name.startswith("hunt-"):
-        rc = fm.get("report_count")
+        rc = provenance_entry.get("report_count") if isinstance(provenance_entry, dict) else None
         if rc is None:
-            grounding.append(f"{name}: hunt-* skill missing `report_count:` (use 0 if not a counted-report corpus)")
-        elif not re.fullmatch(r"\d+", rc.strip()):
-            grounding.append(f"{name}: `report_count: {rc}` must be a non-negative integer")
+            grounding.append(f"{name}: hunt-* skill missing `report_count` in metadata/skill-provenance.json")
+        elif not isinstance(rc, int) or isinstance(rc, bool) or rc < 0:
+            grounding.append(f"{name}: provenance `report_count: {rc}` must be a non-negative integer")
 
     # client-identifier denylist
     if denylist:
@@ -218,6 +239,7 @@ def lint_skill(skill_dir, denylist):
 
 def main(argv):
     denylist = load_denylist()
+    provenance = load_provenance()
     if argv:
         targets = [a if os.path.isabs(a) else os.path.join(REPO, a) for a in argv]
     else:
@@ -226,9 +248,14 @@ def main(argv):
 
     all_errors, all_warnings = [], []
     for t in targets:
-        e, w = lint_skill(t, denylist)
+        e, w = lint_skill(t, denylist, provenance)
         all_errors += e
         all_warnings += w
+
+    if not argv:
+        skill_names = {os.path.basename(t.rstrip("/")) for t in targets}
+        for extra in sorted(set(provenance) - skill_names):
+            all_errors.append(f"{extra}: provenance entry has no matching skill directory")
 
     for w in all_warnings:
         print(f"::warning:: {w}" if os.environ.get("GITHUB_ACTIONS") else f"WARN  {w}")

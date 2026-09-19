@@ -8,7 +8,7 @@ victim.
 
 ## The `report_count` convention
 
-A skill's `report_count:` frontmatter = **the number of distinct disclosed-report
+A skill's `report_count` entry in `metadata/skill-provenance.json` = **the number of distinct disclosed-report
 URLs cited in its pattern library** (`grep -oE 'reports/[0-9]+'` → unique). It is
 grep-auditable: the number always equals what you can count in the file. Nothing
 is asserted that a reader can't click.
@@ -28,10 +28,10 @@ stated side by side, mean what they say.
 
 Deep API bugs (mass-assignment, BOLA/BFLA, shadow/zombie APIs, GraphQL depth) are
 rarely disclosed publicly, so H1 reports under-cover them. Those skills are
-grounded on a **second tier** cited under `sources:` in the SKILL.md
+grounded on a **second tier** cited under `sources` in `metadata/skill-provenance.json`
 (PortSwigger / Assetnote research, named CVEs) rather than `report_count`. The two
 tiers are labeled distinctly and never conflated: `report_count` = disclosed
-reports only; `sources:` = research / CVE grounding.
+reports only; `sources` = research / CVE grounding.
 
 ## The credibility gate
 
