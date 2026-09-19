@@ -25,6 +25,8 @@ from datetime import datetime, timezone
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EVAL = os.path.join(REPO, "eval")
 MCP_CONFIG = os.path.join(EVAL, "burp-mcp.json")
+sys.path.insert(0, os.path.join(REPO, "engine"))
+import agent as PROVIDER_AGENT  # noqa: E402
 
 # The agent's "hands": Burp MCP request tools + a scripting toolset so it can run
 # realistic scripted attacks (blind-SQLi char-by-char extraction loops, JWT forging,
@@ -89,6 +91,21 @@ def build_task(objective, base, target_desc):
 
 
 def run_agent(task, skills_on, model, max_turns, timeout):
+    provider = os.environ.get("CBH_AGENT_PROVIDER", "auto")
+    selected = PROVIDER_AGENT.resolve_provider(provider, model)
+    if selected == "codex":
+        if not skills_on:
+            return {"agent_error": "Codex baseline isolation is unsupported; use --conditions skills",
+                    "duration_s": 0}
+        codex_model = None if (model or "").startswith("claude") else model
+        result = PROVIDER_AGENT.run_agent(task, skills_on=True, model=codex_model,
+                                          max_turns=max_turns, timeout=timeout,
+                                          provider="codex", cwd=REPO)
+        return {"result": result.get("result", ""), "cost_usd": result.get("cost_usd"),
+                "num_turns": result.get("num_turns"), "is_error": bool(result.get("error")),
+                "in_tok": None, "out_tok": None, "duration_s": result.get("duration_s"),
+                "agent_error": result.get("error")}
+    model = model or "claude-sonnet-4-6"
     cmd = [
         "claude", "-p", task,
         "--mcp-config", MCP_CONFIG, "--strict-mcp-config",
@@ -131,7 +148,8 @@ def main():
     ap.add_argument("--conditions", default="skills,baseline",
                     help="comma list: skills,baseline")
     ap.add_argument("--limit", type=int, default=0, help="run only first N challenges (0=all)")
-    ap.add_argument("--model", default="claude-sonnet-4-6",
+    ap.add_argument("--provider", choices=["auto", "claude", "codex"], default="auto")
+    ap.add_argument("--model", default=None,
                     help="held constant across conditions; the ablation isolates the skills")
     ap.add_argument("--max-turns", type=int, default=40)
     ap.add_argument("--timeout", type=int, default=420, help="per-run seconds")
@@ -139,11 +157,14 @@ def main():
     ap.add_argument("--base", default="http://localhost:3001")
     ap.add_argument("--out", default=os.path.join(EVAL, "results", "run.jsonl"))
     a = ap.parse_args()
+    os.environ["CBH_AGENT_PROVIDER"] = a.provider
 
     challenges = json.load(open(a.challenges))
     if a.limit:
         challenges = challenges[:a.limit]
     conditions = [c.strip() for c in a.conditions.split(",") if c.strip()]
+    if a.provider == "codex" and any(c != "skills" for c in conditions):
+        ap.error("Codex cannot currently disable Agent Skills for a clean baseline; use --conditions skills")
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     out = open(a.out, "a")
     rows = []

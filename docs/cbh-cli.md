@@ -1,12 +1,12 @@
 # `cbh` — claude-bughunter CLI
 
-> **Secondary interface — slash commands are primary.** Inside a Claude Code conversation, use the slash commands (`/recon`, `/hunt`, `/triage`, `/report`, `/validate`, `/chain`, `/autopilot`, `/scope`, etc.) — they leverage the full skill content and the LLM's judgment.
+> **Deterministic companion interface.** For LLM-guided work, use Claude Code slash commands or Codex's `$bughunter` router (`hunt`, `recon`, `triage`, `report`, `validate`, `chain`, `autopilot`, `scope`, etc.).
 >
-> `cbh` is the **terminal-native deterministic runner** — use it when you're outside Claude Code, automating in CI/CD, running scheduled recon, or verifying labs reproducibly. Same skills, different execution model.
+> `cbh` is the **terminal-native deterministic runner** — use it outside an agent conversation, in CI/CD, for scheduled recon, or to verify labs reproducibly.
 >
 > **Availability — three ways to run `cbh`:**
 > 1. **From a git clone** (no install): `python3 scripts/cbh.py <cmd>` — uses the live `skills/` + `docs/disclosed-reports/`.
-> 2. **Installed standalone** (works without the repo): `pipx install git+https://github.com/elementalsouls/Claude-BugHunter` (or `pip install .` from a clone). Gives you a global `cbh` backed by a bundled skill index; recon output goes to `./recon/` (override with `--out`), and skill/report pointers link to GitHub.
+> 2. **Installed standalone** (works without the repo): `pipx install git+https://github.com/Hamoyeah/Codex-Bug-hunter` (or `pip install .` from a clone). Gives you a global `cbh` backed by a bundled skill index; recon output goes to `./recon/` (override with `--out`), and skill/report pointers link to GitHub.
 > 3. It does **not** ship with the plugin — the plugin provides skills + slash commands only.
 >
 > Regenerate the bundled index after editing skills: `python3 scripts/gen_skill_index.py`.
@@ -15,8 +15,8 @@
 
 | Use case | Use this |
 |---|---|
-| Hunting a new target conversationally, applying judgment | **Slash commands** in Claude Code (`/hunt`, `/triage`, etc.) |
-| Building a chain across multiple primitives | **Slash commands** — LLM keeps state across the conversation |
+| Hunting a new target conversationally, applying judgment | **Claude slash commands or `$bughunter` in Codex** |
+| Building a chain across multiple primitives | **Agent workflow** — the LLM keeps state across the conversation |
 | Scheduled / CI / scripted runs | **`cbh`** — deterministic exit codes, identical output across runs |
 | Bulk passive recon (hundreds of subdomains) | **`cbh recon`** — real `subfinder`/`dig`/`curl`, no LLM in the loop |
 | Verifying labs / reproducing claims | **`cbh`** — every Phase 2 doc's curls work via `cbh` too |

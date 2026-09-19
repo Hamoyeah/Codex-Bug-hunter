@@ -8,9 +8,9 @@
 #   - scripts/hunt.sh → ~/.claude/scripts/hunt.sh + sourced from shell rc
 #   (unchanged from prior behavior)
 #
-# MULTI-HARNESS FLAGS (skills only — the SKILL.md files. Slash commands,
-# the plugin marketplace, and the /hunt engine are Claude-Code-specific and do
-# NOT port; other harnesses get the knowledge, not the orchestration):
+# MULTI-HARNESS FLAGS:
+#   --codex-only   install the complete Codex skill experience into ~/.agents/skills
+#                  without changing ~/.claude or shell startup files
 #   --agents       force-copy skills → ~/.agents/skills/  (Codex; OpenCode reads ~/.claude)
 #   --hermes       force-copy skills → ~/.hermes/skills/   (Hermes Agent)
 #   --antigravity  force-copy skills → ~/.gemini/config/skills/ (Google AntiGravity)
@@ -54,10 +54,11 @@ MANIFEST="$MANIFEST_DIR/$BUNDLE_NAME.txt"
 
 usage() { sed -n '2,/^# ===/p' "$0" | sed 's/^#\{0,1\} \{0,1\}//'; }
 
-DO_AGENTS=0; DO_HERMES=0; DO_ANTIGRAVITY=0; DO_MCP=0; NORMALIZE=0; DETECT=0; DO_UNINSTALL=0; NO_SHELL=0
+DO_AGENTS=0; DO_HERMES=0; DO_ANTIGRAVITY=0; DO_MCP=0; NORMALIZE=0; DETECT=0; DO_UNINSTALL=0; NO_SHELL=0; CODEX_ONLY=0
 HAS_CLAUDE=0; HAS_OPENCODE=0; HAS_CODEX=0; HAS_HERMES=0; HAS_ANTIGRAVITY=0
 while [ $# -gt 0 ]; do
   case "$1" in
+    --codex-only) CODEX_ONLY=1; DO_AGENTS=1; NO_SHELL=1 ;;
     --agents) DO_AGENTS=1 ;;
     --hermes) DO_HERMES=1 ;;
     --antigravity) DO_ANTIGRAVITY=1 ;;
@@ -72,6 +73,12 @@ while [ $# -gt 0 ]; do
   shift
 done
 
+if [ "$CODEX_ONLY" = "1" ]; then
+  BACKUP_DEST="$HOME/.agents/install-backups/$(date +%Y%m%d-%H%M%S)"
+  MANIFEST_DIR="$HOME/.agents/.skill-manifests"
+  MANIFEST="$MANIFEST_DIR/$BUNDLE_NAME.txt"
+fi
+
 # === Uninstall: remove only our footprint; keep skills a sibling bundle owns ===
 uninstall_bundle() {
   if [ ! -f "$MANIFEST" ]; then
@@ -83,7 +90,7 @@ uninstall_bundle() {
   local rel target other owned removed=0 kept=0
   while IFS= read -r rel; do
     [ -z "$rel" ] && continue
-    target="$HOME/.claude/$rel"
+    if [ "$CODEX_ONLY" = "1" ]; then target="$HOME/.agents/$rel"; else target="$HOME/.claude/$rel"; fi
     owned=0
     for other in "$MANIFEST_DIR"/*.txt; do
       [ -e "$other" ] || continue
@@ -94,15 +101,18 @@ uninstall_bundle() {
       kept=$((kept + 1))                 # another bundle still owns it — keep
     else
       rm -rf "$target"
-      if [ -e "$HOME/.agents/$rel" ]; then rm -rf "$HOME/.agents/$rel"; fi
-      if [ -e "$HOME/.hermes/$rel" ]; then rm -rf "$HOME/.hermes/$rel"; fi
-      if [ -e "$HOME/.gemini/config/$rel" ]; then rm -rf "$HOME/.gemini/config/$rel"; fi
+      if [ "$CODEX_ONLY" != "1" ]; then
+        if [ -e "$HOME/.agents/$rel" ]; then rm -rf "$HOME/.agents/$rel"; fi
+        if [ -e "$HOME/.hermes/$rel" ]; then rm -rf "$HOME/.hermes/$rel"; fi
+        if [ -e "$HOME/.gemini/config/$rel" ]; then rm -rf "$HOME/.gemini/config/$rel"; fi
+      fi
       removed=$((removed + 1))
     fi
   done < "$MANIFEST"
   rm -f "$MANIFEST"
   echo "  ✓ removed $removed item(s); kept $kept still owned by another bundle"
   # The hunt.sh rc source line is ours alone — strip it from shell rc files.
+  if [ "$CODEX_ONLY" = "1" ]; then return 0; fi
   for rc in "$HOME/.zshrc" "$HOME/.bashrc" "${ZDOTDIR:-}/.zshrc"; do
     [ -f "$rc" ] || continue
     if grep -q "claude/scripts/hunt.sh" "$rc" 2>/dev/null; then
@@ -169,10 +179,12 @@ install_skills() {
 }
 
 echo "Installing Claude-BugHunter bundle from $REPO_DIR"
-if [ "$DO_AGENTS" = "1" ] || [ "$DO_HERMES" = "1" ] || [ "$DO_ANTIGRAVITY" = "1" ]; then echo "(multi-harness mode)"; fi
+if [ "$CODEX_ONLY" = "1" ]; then echo "(Codex-only mode; Claude settings and shell startup files stay untouched)"
+elif [ "$DO_AGENTS" = "1" ] || [ "$DO_HERMES" = "1" ] || [ "$DO_ANTIGRAVITY" = "1" ]; then echo "(multi-harness mode)"; fi
 echo ""
 
-# === Claude Code (always) — skills + commands + hunt.sh ===
+# === Claude Code — skills + commands + hunt.sh ===
+if [ "$CODEX_ONLY" = "0" ]; then
 install_skills "$HOME/.claude/skills" "skills"
 
 COMMANDS_DEST="$HOME/.claude/commands"
@@ -241,8 +253,9 @@ mkdir -p "$MANIFEST_DIR"
 echo "  ✓ Install manifest ($(wc -l < "$MANIFEST" | tr -d ' ') entries) → $MANIFEST"
 echo "    Uninstall later with:  bash scripts/install.sh --uninstall"
 echo ""
+fi
 
-# === Extra harness targets (skills only) ===
+# === Extra harness targets ===
 if [ "$DO_AGENTS" = "1" ]; then
   install_skills "$HOME/.agents/skills" "agents"
   # Codex (which reads ~/.agents/skills) HARD-rejects descriptions > 1024 chars.
@@ -280,6 +293,13 @@ for name in sorted(os.listdir(root)):
         open(p, "w", encoding="utf-8").write("\n".join(out))
 PY
   fi
+  if [ "$CODEX_ONLY" = "1" ]; then
+    mkdir -p "$MANIFEST_DIR"
+    for d in "$REPO_DIR/skills"/*/; do echo "skills/$(basename "$d")"; done > "$MANIFEST"
+    echo "  ✓ Codex install manifest ($(wc -l < "$MANIFEST" | tr -d ' ') entries) → $MANIFEST"
+    echo "    Uninstall later with: bash scripts/install.sh --codex-only --uninstall"
+    echo ""
+  fi
 fi
 if [ "$DO_HERMES" = "1" ]; then install_skills "$HOME/.hermes/skills" "hermes"; fi
 if [ "$DO_ANTIGRAVITY" = "1" ]; then install_skills "$HOME/.gemini/config/skills" "antigravity"; fi
@@ -295,7 +315,8 @@ if [ "$DO_MCP" = "1" ]; then
     if [ "$HAS_ANTIGRAVITY" = "1" ]; then MCP_TARGETS="$MCP_TARGETS --antigravity"; fi
   else
     # explicit-flag mode
-    if [ "$DO_AGENTS"      = "1" ]; then MCP_TARGETS="$MCP_TARGETS --opencode --codex"; fi
+    if [ "$CODEX_ONLY" = "1" ]; then MCP_TARGETS="$MCP_TARGETS --codex"
+    elif [ "$DO_AGENTS" = "1" ]; then MCP_TARGETS="$MCP_TARGETS --opencode --codex"; fi
     if [ "$DO_HERMES"      = "1" ]; then MCP_TARGETS="$MCP_TARGETS --hermes"; fi
     if [ "$DO_ANTIGRAVITY" = "1" ]; then MCP_TARGETS="$MCP_TARGETS --antigravity"; fi
   fi
@@ -315,15 +336,19 @@ echo "============================================"
 echo "✓ Install complete"
 echo "============================================"
 echo ""
-echo "Claude Code:        $HOME/.claude/skills  (+ commands, hunt.sh)"
+if [ "$CODEX_ONLY" = "0" ]; then echo "Claude Code:        $HOME/.claude/skills  (+ commands, hunt.sh)"; fi
 if [ "$DO_AGENTS" = "1" ]; then echo "Codex+OpenCode:     $HOME/.agents/skills"; fi
 if [ "$DO_HERMES" = "1" ]; then echo "Hermes Agent:       $HOME/.hermes/skills"; fi
 if [ "$DO_ANTIGRAVITY" = "1" ]; then echo "Google AntiGravity: $HOME/.gemini/config/skills"; fi
 if [ -d "$BACKUP_DEST" ]; then echo "Backups:            $BACKUP_DEST  (outside loading paths)"; fi
 echo ""
-if [ "$DETECT" = "0" ] && [ "$DO_AGENTS" = "0" ] && [ "$DO_HERMES" = "0" ] && [ "$DO_ANTIGRAVITY" = "0" ]; then
+if [ "$CODEX_ONLY" = "0" ] && [ "$DETECT" = "0" ] && [ "$DO_AGENTS" = "0" ] && [ "$DO_HERMES" = "0" ] && [ "$DO_ANTIGRAVITY" = "0" ]; then
   echo "Other harnesses?  bash scripts/install.sh --all   (auto-detects Codex / OpenCode / Hermes / AntiGravity)"
   echo "See also: docs/multi-harness.md"
 fi
 echo ""
-echo "Next: open a new terminal (or 'source $SHELL_RC') and try:  hunt acme-test"
+if [ "$CODEX_ONLY" = "1" ]; then
+  echo 'Next: start a new Codex thread and invoke:  $bughunter hunt <authorized-target>'
+else
+  echo "Next: open a new terminal (or 'source $SHELL_RC') and try:  hunt acme-test"
+fi

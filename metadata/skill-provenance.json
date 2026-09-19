@@ -1,0 +1,321 @@
+{
+  "apk-redteam-pipeline": {
+    "sources": "authorized-engagement",
+    "report_count": 1
+  },
+  "bb-local-toolkit": {
+    "sources": "community, operator_experience"
+  },
+  "bb-methodology": {
+    "sources": "community, public_research"
+  },
+  "bug-bounty": {
+    "sources": "community, public_research"
+  },
+  "bugcrowd-reporting": {
+    "sources": "bugcrowd, community"
+  },
+  "cloud-iam-deep": {
+    "sources": "aws-iam-docs, azure-rbac-docs, gcp-iam-docs, hackingthe.cloud, pacu, peirates, prowler, rhinosecuritylabs_research, hackerone_public",
+    "report_count": 6
+  },
+  "enterprise-vpn-attack": {
+    "sources": "authorized-engagement, public-advisories, cisa-kev",
+    "report_count": 1
+  },
+  "evidence-hygiene": {
+    "sources": "community, operator_experience"
+  },
+  "hunt-api-misconfig": {
+    "sources": "hackerone_public, owasp_api_top10_2023, public_research",
+    "report_count": 0
+  },
+  "hunt-aspnet": {
+    "sources": "github, authorized-engagement",
+    "report_count": 1
+  },
+  "hunt-ato": {
+    "sources": "hackerone_public, public_research",
+    "report_count": 7
+  },
+  "hunt-auth-bypass": {
+    "sources": "github, hackerone_public, github_security_lab, projectdiscovery_research",
+    "report_count": 12
+  },
+  "hunt-brute-force": {
+    "sources": "public_research",
+    "report_count": 6
+  },
+  "hunt-business-logic": {
+    "sources": "hackerone_public, github",
+    "report_count": 25
+  },
+  "hunt-cache-poison": {
+    "sources": "github, hackerone_public, portswigger_research, omergil_research, youstin_research",
+    "report_count": 8
+  },
+  "hunt-captcha-bypass": {
+    "sources": "public_research, operator_experience",
+    "report_count": 6
+  },
+  "hunt-cicd": {
+    "sources": "hackerone_public, github_security_lab, cve_database, portswigger_research",
+    "report_count": 18
+  },
+  "hunt-clickjacking": {
+    "sources": "hackerone_public, public_research",
+    "report_count": 6
+  },
+  "hunt-cloud-misconfig": {
+    "sources": "hackerone_public, public_research",
+    "report_count": 6
+  },
+  "hunt-cors": {
+    "report_count": 19,
+    "sources": "hackerone_public"
+  },
+  "hunt-csrf": {
+    "sources": "github, hackerone_public, bugcrowd_public, github_security_advisories",
+    "report_count": 18
+  },
+  "hunt-deserialization": {
+    "sources": "hackerone_public",
+    "report_count": 22
+  },
+  "hunt-dispatch": {
+    "sources": "community",
+    "report_count": 0
+  },
+  "hunt-dom": {
+    "sources": "portswigger_research, hackerone_public, github_security_advisories",
+    "report_count": 14
+  },
+  "hunt-exceptional-conditions": {
+    "report_count": 0,
+    "sources": "hackerone_public"
+  },
+  "hunt-file-upload": {
+    "sources": "hackerone_public, cve_database, owasp, public_research",
+    "report_count": 5
+  },
+  "hunt-fintech-graphql": {
+    "sources": "owasp_api_top10_2023, public_research",
+    "report_count": 0
+  },
+  "hunt-forgot-password": {
+    "sources": "hackerone_public, public_research",
+    "report_count": 6
+  },
+  "hunt-graphql": {
+    "sources": "hackerone_public, github, gitlab_security",
+    "report_count": 26
+  },
+  "hunt-grpc": {
+    "sources": "hackerone_public, grpc_security_research, cert_cc_advisory",
+    "report_count": 6
+  },
+  "hunt-host-header": {
+    "sources": "portswigger_research, hackerone_public",
+    "report_count": 16
+  },
+  "hunt-html-injection": {
+    "sources": "hackerone_public, public_research",
+    "report_count": 6
+  },
+  "hunt-http-smuggling": {
+    "sources": "hackerone_public, cve_database, portswigger_research, public_research",
+    "report_count": 12
+  },
+  "hunt-idor": {
+    "sources": "github, hackerone_public",
+    "report_count": 39
+  },
+  "hunt-jwt-crypto": {
+    "report_count": 6,
+    "sources": "hackerone_public"
+  },
+  "hunt-k8s": {
+    "sources": "hackerone_public, cve_database, kubernetes_security_research, portswigger_research",
+    "report_count": 13
+  },
+  "hunt-laravel": {
+    "sources": "hackerone_public, cve_database",
+    "report_count": 14
+  },
+  "hunt-ldap": {
+    "sources": "hackerone_public, owasp, portswigger",
+    "report_count": 0
+  },
+  "hunt-lfi": {
+    "sources": "hackerone_public, synacktiv_research, portswigger_research",
+    "report_count": 24
+  },
+  "hunt-llm-ai": {
+    "sources": "owasp_genai_2025_2026, portswigger_research, embracethered_research, hackerone_public",
+    "report_count": 0
+  },
+  "hunt-mfa-bypass": {
+    "sources": "hackerone_public, cve_database, nist_800_63b, public_research",
+    "report_count": 5
+  },
+  "hunt-misc": {
+    "sources": "github, hackerone_public",
+    "report_count": 225
+  },
+  "hunt-nextjs": {
+    "sources": "\"cve_database (CVE-2024-34351 / GHSA-fr5h-rqp8-mj6g), Next.js advisories\"",
+    "report_count": 0
+  },
+  "hunt-nodejs": {
+    "sources": "hackerone_public, snyk_research, portswigger_research",
+    "report_count": 24
+  },
+  "hunt-nosqli": {
+    "sources": "hackerone_public",
+    "report_count": 14
+  },
+  "hunt-ntlm-info": {
+    "sources": "github, authorized-engagement",
+    "report_count": 1
+  },
+  "hunt-oauth": {
+    "sources": "github, hackerone_public, salt_labs, descope, detectify_labs, harel_research",
+    "report_count": 22
+  },
+  "hunt-open-redirect": {
+    "sources": "hackerone_public",
+    "report_count": 28
+  },
+  "hunt-race-condition": {
+    "sources": "github, hackerone_public, portswigger_research, flatt_security",
+    "report_count": 10
+  },
+  "hunt-rag-vector": {
+    "sources": "owasp_genai_2025_2026, public_research",
+    "report_count": 0
+  },
+  "hunt-rce": {
+    "sources": "github, hackerone_public",
+    "report_count": 87
+  },
+  "hunt-saml": {
+    "sources": "cve_database, oasis_saml_spec, academic_research, public_research",
+    "report_count": 6
+  },
+  "hunt-session": {
+    "sources": "hackerone_public, portswigger_research, owasp_wstg",
+    "report_count": 18
+  },
+  "hunt-shadow-api": {
+    "sources": "owasp_api_top10_2023, portswigger_research, public_research",
+    "report_count": 0
+  },
+  "hunt-sharepoint": {
+    "sources": "github, authorized-engagement",
+    "report_count": 1
+  },
+  "hunt-source-leak": {
+    "sources": "hackerone_public, offensive_research",
+    "report_count": 7
+  },
+  "hunt-spa-api": {
+    "sources": "authorized-engagement",
+    "report_count": 1
+  },
+  "hunt-springboot": {
+    "sources": "hackerone_public, cve_database, spring_security_advisories",
+    "report_count": 16
+  },
+  "hunt-sqli": {
+    "sources": "github, hackerone_public, github_security_advisories, snyk_research, sonarsource_research",
+    "report_count": 29
+  },
+  "hunt-ssrf": {
+    "sources": "github, hackerone_public, portswigger_research, binarysecurity_research",
+    "report_count": 34
+  },
+  "hunt-ssti": {
+    "sources": "hackerone_public, cve_database, public_research",
+    "report_count": 6
+  },
+  "hunt-subdomain": {
+    "sources": "github, hackerone_public, binarysecurity_research, can-i-take-over-xyz_research",
+    "report_count": 3
+  },
+  "hunt-tls-network": {
+    "report_count": 6,
+    "sources": "portswigger_research, ssl_labs_research, hstspreload_org"
+  },
+  "hunt-websocket": {
+    "sources": "hackerone_public, portswigger_research, cve",
+    "report_count": 11
+  },
+  "hunt-xss": {
+    "sources": "github, hackerone_public",
+    "report_count": 174
+  },
+  "hunt-xxe": {
+    "sources": "github, hackerone_public, assetnote_research, splunk_security",
+    "report_count": 10
+  },
+  "ios-redteam-pipeline": {
+    "sources": "public_research, frida_docs, objection_docs, owasp_mastg",
+    "report_count": 0
+  },
+  "m365-entra-attack": {
+    "sources": "authorized-engagement, microsoft-docs, AADInternals",
+    "report_count": 1
+  },
+  "meme-coin-audit": {
+    "sources": "public_research"
+  },
+  "mid-engagement-ir-detection": {
+    "sources": "authorized-engagement",
+    "report_count": 1
+  },
+  "offensive-osint": {
+    "sources": "hackerone_public, community, public_research"
+  },
+  "okta-attack": {
+    "sources": "public-okta-docs, idp-redteam-knowledge, disclosed-incidents",
+    "report_count": 8
+  },
+  "osint-methodology": {
+    "sources": "community, public_research"
+  },
+  "recon-scope-triage": {
+    "sources": "authorized-engagement",
+    "report_count": 1
+  },
+  "redteam-mindset": {
+    "sources": "authorized-engagement",
+    "report_count": 1
+  },
+  "redteam-report-template": {
+    "sources": "authorized-engagement-deliverable, enterprise-redteam-report-conventions",
+    "report_count": 1
+  },
+  "report-writing": {
+    "sources": "community, operator_experience"
+  },
+  "security-arsenal": {
+    "sources": "community, public_research"
+  },
+  "supply-chain-attack-recon": {
+    "sources": "alex-birsan-dependency-confusion, supply-chain-research, github-actions-security, cisa-advisories, mandiant-tag, github-security-blog, snyk-research",
+    "report_count": 12
+  },
+  "triage-validation": {
+    "sources": "community, operator_experience"
+  },
+  "vmware-vcenter-attack": {
+    "sources": "vmware-security-advisories, public-cve-databases, redteam-knowledge, disclosed-cves, cisa-kev, mandiant-zdi-writeups",
+    "report_count": 10
+  },
+  "web2-recon": {
+    "sources": "community, public_research"
+  },
+  "web3-audit": {
+    "sources": "public_research, community"
+  }
+}

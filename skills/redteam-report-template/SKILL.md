@@ -1,8 +1,6 @@
 ---
 name: redteam-report-template
 description: Client-facing red-team deliverable format — codifies the Subject / Observations / Description / Impact / Recommendation / PoC structure used for external red-team engagements (not bug-bounty platform reports). Different audience, different tone, different cadence. Built from an authorized engagement deliverable where 14 findings were packaged into a 52KB MD + 2.2MB DOCX with 16 embedded screenshots. Use when the engagement is "external red team for an enterprise client" (not H1/Bugcrowd/Intigriti), when generating the final report, when the client has specified a custom report format, or when packaging findings into DOCX/PDF.
-sources: authorized-engagement-deliverable, enterprise-redteam-report-conventions
-report_count: 1
 ---
 
 ## When to use
@@ -171,7 +169,6 @@ brew install pandoc
 pandoc REPORT_FINAL.md \
   -o REPORT_FINAL.docx \
   --resource-path=engagement_log/poc \
-  --reference-doc=~/.claude/skills/redteam-report-template/templates/reference.docx \
   --toc \
   --toc-depth=2 \
   --highlight-style=tango
@@ -270,15 +267,18 @@ Each gives the client context about their real-world detection capability, which
 
 ## Template library (where to put canned text)
 
-Maintain reusable boilerplate in:
+Maintain reusable boilerplate in a project-local or operator-selected directory:
 ```
-~/.claude/skills/redteam-report-template/templates/
+report-templates/
     executive_summary.md      # Reusable exec summary skeleton
     methodology.md            # Standard methodology section
     cleanup_statement.md      # Standard cleanup language
     reference.docx            # Pandoc style template (fonts, headings, colors)
     cover.docx                # Cover page template
 ```
+
+If you create `reference.docx`, pass `--reference-doc=report-templates/reference.docx`.
+The bundle does not ship a reference DOCX and does not assume a provider-specific home path.
 
 Don't write these from scratch each engagement; clone and customize.
 

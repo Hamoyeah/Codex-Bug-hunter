@@ -10,9 +10,9 @@
 #   - scripts\hunt.ps1 -> ~\.claude\scripts\hunt.ps1 + dot-sourced from
 #                         the PowerShell profile ($PROFILE) automatically
 #
-# MULTI-HARNESS FLAGS (skills only — the 82 SKILL.md files. Slash commands,
-# the plugin marketplace, and the /hunt engine are Claude-Code-specific and do
-# NOT port; other harnesses get the knowledge, not the orchestration):
+# MULTI-HARNESS FLAGS:
+#   -CodexOnly    install the complete Codex skill experience into ~\.agents\skills
+#                 without changing ~\.claude or the PowerShell profile
 #   -Agents        force-copy skills -> ~\.agents\skills\  (Codex; OpenCode reads ~\.claude)
 #   -Hermes        force-copy skills -> ~\.hermes\skills\   (Hermes Agent)
 #   -AntiGravity   force-copy skills -> ~\.gemini\config\skills\ (Google AntiGravity)
@@ -39,6 +39,7 @@
 
 [CmdletBinding()]
 param(
+    [switch] $CodexOnly,
     [switch] $Agents,
     [switch] $Hermes,
     [switch] $AntiGravity,
@@ -55,12 +56,19 @@ $ErrorActionPreference = 'Stop'
 # --- repo + paths -------------------------------------------------------
 $RepoDir    = Split-Path -Parent $PSScriptRoot            # parent of scripts\
 $Timestamp  = (Get-Date).ToString('yyyyMMdd-HHmmss')
-$BackupDest = Join-Path $HOME ".claude\install-backups\$Timestamp"
+# Internal/CI override keeps installer tests isolated. Normal installs always use $HOME.
+$InstallHome = if ($env:CBH_INSTALL_HOME) {
+    [IO.Path]::GetFullPath($env:CBH_INSTALL_HOME)
+} else {
+    $HOME
+}
+$StateRoot  = if ($CodexOnly) { Join-Path $InstallHome '.agents' } else { Join-Path $InstallHome '.claude' }
+$BackupDest = Join-Path $StateRoot "install-backups\$Timestamp"
 
 $BundleName   = 'claude-bughunter'
-$ManifestDir  = Join-Path $HOME '.claude\.skill-manifests'
+$ManifestDir  = Join-Path $StateRoot '.skill-manifests'
 $Manifest     = Join-Path $ManifestDir "$BundleName.txt"
-$ScriptsDest  = Join-Path $HOME '.claude\scripts'
+$ScriptsDest  = Join-Path $InstallHome '.claude\scripts'
 $SkillsSource = Join-Path $RepoDir 'skills'
 $CommandsSrc  = Join-Path $RepoDir 'commands'
 $HuntSrc      = Join-Path $RepoDir 'scripts\hunt.ps1'
@@ -85,7 +93,12 @@ if ($Help) {
 # the Windows convention (only `python.exe` / `py.exe` ship on Windows). Probe
 # py launcher -> python -> python3 in that order.
 function Get-Python {
-    foreach ($c in @(@( 'py', '-3' ), 'python', 'python3')) {
+    $probes = @(
+        ,@('py', '-3')
+        ,@('python')
+        ,@('python3')
+    )
+    foreach ($c in $probes) {
         $exe = $c[0]
         if (Get-Command $exe -ErrorAction SilentlyContinue) {
             return , $c   # array of arg(s)
@@ -156,10 +169,41 @@ function Install-Skills([string] $Dest, [string] $Label) {
     Write-Host ''
 }
 
+# Keep the Codex copy inside the Agent Skills frontmatter limits without Python.
+function Normalize-CodexSkills([string] $Dest) {
+    foreach ($skill in (Get-ChildItem -LiteralPath $Dest -Directory)) {
+        $path = Join-Path $skill.FullName 'SKILL.md'
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { continue }
+        $lines = [System.IO.File]::ReadAllLines($path)
+        $changed = $false
+        for ($i = 0; $i -lt [Math]::Min(12, $lines.Count); $i++) {
+            if ($lines[$i] -match '^description:\s*(.*)$') {
+                $value = $Matches[1]
+                $inner = $value.Trim('"', "'")
+                if ($inner.Length -gt 1024) {
+                    $cut = $inner.Substring(0, 1021).TrimEnd(' ', ',', ';', ':', '-', '_')
+                    $lines[$i] = 'description: "' + $cut.Replace('"', '\"') + '..."'
+                    $changed = $true
+                    Write-Host "    truncated $($skill.Name) description for Codex"
+                }
+            }
+            if ($NormalizeFrontmatter -and $lines[$i] -match '^(sources|report_count):\s') {
+                $lines[$i] = $null
+                $changed = $true
+            }
+        }
+        if ($changed) {
+            Write-HuntFile $path (($lines | Where-Object { $null -ne $_ }) -join "`n")
+        }
+    }
+}
+
 # --- flag plumbing -----------------------------------------------------
-$DO_AGENTS = [bool]$Agents; $DO_HERMES = [bool]$Hermes; $DO_ANTIGRAVITY = [bool]$AntiGravity; $DO_MCP = [bool]$BurpMcp
+$CODEX_ONLY = [bool]$CodexOnly
+$DO_AGENTS = [bool]($Agents -or $CodexOnly); $DO_HERMES = [bool]$Hermes; $DO_ANTIGRAVITY = [bool]$AntiGravity; $DO_MCP = [bool]$BurpMcp
 $NORMALIZE = [bool]$NormalizeFrontmatter; $DETECT = [bool]$All
-$DO_UNINSTALL = [bool]$Uninstall; $NO_PROFILE = [bool]$NoProfile
+$DO_UNINSTALL = [bool]$Uninstall; $NO_PROFILE = [bool]($NoProfile -or $CodexOnly)
+$INSTALL_CLAUDE = -not $CODEX_ONLY
 $HAS_CLAUDE = $false; $HAS_OPENCODE = $false; $HAS_CODEX = $false; $HAS_HERMES = $false; $HAS_ANTIGRAVITY = $false
 
 # --- Uninstall ---------------------------------------------------------
@@ -177,17 +221,21 @@ function Uninstall-Bundle {
     }
     $removed = 0; $kept = 0
     foreach ($rel in (Get-Content -LiteralPath $Manifest | Where-Object { $_ })) {
-        $target = Join-Path $HOME ".claude\$rel"
         $owned = $false
         foreach ($s in $otherSets) { if ($s -contains $rel) { $owned = $true; break } }
         if ($owned) { $kept++ } else {
-            if (Test-Path -LiteralPath $target) { Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction SilentlyContinue }
-            $agentsTarget = Join-Path $HOME ".agents\$rel"
-            if (Test-Path -LiteralPath $agentsTarget) { Remove-Item -LiteralPath $agentsTarget -Recurse -Force -ErrorAction SilentlyContinue }
-            $hermesTarget = Join-Path $HOME ".hermes\$rel"
-            if (Test-Path -LiteralPath $hermesTarget) { Remove-Item -LiteralPath $hermesTarget -Recurse -Force -ErrorAction SilentlyContinue }
-            $antiGravityTarget = Join-Path $HOME ".gemini\config\$rel"
-            if (Test-Path -LiteralPath $antiGravityTarget) { Remove-Item -LiteralPath $antiGravityTarget -Recurse -Force -ErrorAction SilentlyContinue }
+            $roots = if ($CODEX_ONLY) {
+                @(Join-Path $InstallHome '.agents')
+            } else {
+                @((Join-Path $InstallHome '.claude'), (Join-Path $InstallHome '.agents'),
+                  (Join-Path $InstallHome '.hermes'), (Join-Path $InstallHome '.gemini\config'))
+            }
+            foreach ($root in $roots) {
+                $target = Join-Path $root $rel
+                if (Test-Path -LiteralPath $target) {
+                    Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction SilentlyContinue
+                }
+            }
             $removed++
         }
     }
@@ -195,12 +243,12 @@ function Uninstall-Bundle {
     Write-Host "  + removed $removed item(s); kept $kept still owned by another bundle"
 
     # Strip the hunt.ps1 dot-source line from any PowerShell profile(s).
-    $profiles = @(
+    $profiles = if ($CODEX_ONLY) { @() } else { @(
         $PROFILE.CurrentUserCurrentHost,
         $PROFILE.CurrentUserAllHosts,
         $PROFILE.AllUsersCurrentHost,
         $PROFILE.AllUsersAllHosts
-    ) | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
+    ) | Where-Object { $_ -and (Test-Path -LiteralPath $_) } }
     foreach ($p in $profiles) {
         $content = Get-Content -Raw -LiteralPath $p
         if ($content -match 'scripts[\\/]hunt\.ps1') {
@@ -219,11 +267,11 @@ if ($DO_UNINSTALL) { Uninstall-Bundle; exit 0 }
 
 # --- --All: detect harnesses ------------------------------------------
 if ($DETECT) {
-    if ((Get-Command claude -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $HOME '.claude'))) { $HAS_CLAUDE = $true }
-    if ((Get-Command opencode -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $HOME '.config\opencode'))) { $HAS_OPENCODE = $true }
-    if ((Get-Command codex -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $HOME '.codex'))) { $HAS_CODEX = $true }
-    if ((Get-Command hermes -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $HOME '.hermes'))) { $HAS_HERMES = $true }
-    if ((Get-Command antigravity -ErrorAction SilentlyContinue) -or (Get-Command agy -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $HOME '.gemini\config'))) { $HAS_ANTIGRAVITY = $true }
+    if ((Get-Command claude -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $InstallHome '.claude'))) { $HAS_CLAUDE = $true }
+    if ((Get-Command opencode -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $InstallHome '.config\opencode'))) { $HAS_OPENCODE = $true }
+    if ((Get-Command codex -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $InstallHome '.codex'))) { $HAS_CODEX = $true }
+    if ((Get-Command hermes -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $InstallHome '.hermes'))) { $HAS_HERMES = $true }
+    if ((Get-Command antigravity -ErrorAction SilentlyContinue) -or (Get-Command agy -ErrorAction SilentlyContinue) -or (Test-Path (Join-Path $InstallHome '.gemini\config'))) { $HAS_ANTIGRAVITY = $true }
     Write-Host "Detecting installed harnesses:"
     if ($HAS_CLAUDE)      { Write-Host "  + Claude Code        -> ~\.claude\skills" }
     if ($HAS_OPENCODE)    { Write-Host "  + OpenCode           -> reads ~\.claude\skills (MCP wired separately)" }
@@ -244,16 +292,18 @@ if (-not (Test-Path -LiteralPath $SkillsSource -PathType Container)) {
 }
 $skillCount = (Get-ChildItem -LiteralPath $SkillsSource -Directory).Count
 
-# --- Claude Code (always): skills + commands + hunt.ps1 ----------------
+# --- Claude Code: skills + commands + hunt.ps1 -------------------------
 Write-Host "Installing Claude-BugHunter bundle from $RepoDir"
-if ($DO_AGENTS -or $DO_HERMES -or $DO_ANTIGRAVITY) { Write-Host "(multi-harness mode)" }
+if ($CODEX_ONLY) { Write-Host "(Codex-only mode; Claude settings and PowerShell profile stay untouched)" }
+elseif ($DO_AGENTS -or $DO_HERMES -or $DO_ANTIGRAVITY) { Write-Host "(multi-harness mode)" }
 Write-Host ''
 
-Install-Skills (Join-Path $HOME '.claude\skills') 'skills'
+if ($INSTALL_CLAUDE) {
+Install-Skills (Join-Path $InstallHome '.claude\skills') 'skills'
 
 # commands -> ~/.claude/commands
 if (Test-Path -LiteralPath $CommandsSrc) {
-    $cmdDest = Join-Path $HOME '.claude\commands'
+    $cmdDest = Join-Path $InstallHome '.claude\commands'
     if (-not (Test-Path -LiteralPath $cmdDest)) { New-Item -ItemType Directory -Force -Path $cmdDest | Out-Null }
     Write-Host "Commands ->  $cmdDest   (Claude Code only)"
     foreach ($f in (Get-ChildItem -LiteralPath $CommandsSrc -Filter *.md -File)) {
@@ -318,52 +368,23 @@ Write-HuntFile $Manifest (($entries -join "`n") + "`n")
 Write-Host "  + Install manifest ($($entries.Count) entries) -> $Manifest"
 Write-Host "    Uninstall later with:  pwsh ./scripts/install.ps1 -Uninstall"
 Write-Host ''
+}
 
-# --- extra harness targets (skills only) ------------------------------
+# --- extra harness targets --------------------------------------------
 if ($DO_AGENTS) {
-    Install-Skills (Join-Path $HOME '.agents\skills') 'agents'
-    $py = Get-Python
-    if ($py) {
-        $limit = 1024
-        # Inline truncation script (ports the bash heredoc verbatim).
-        $trunc = @"
-import os, re, sys
-root, strip_extra = sys.argv[1], sys.argv[2] == '1'
-LIMIT = 1024
-for name in sorted(os.listdir(root)):
-    p = os.path.join(root, name, 'SKILL.md')
-    if not os.path.isfile(p):
-        continue
-    lines = open(p, encoding='utf-8').read().split('\n')
-    out, changed = [], False
-    for i, line in enumerate(lines):
-        m = re.match(r'^description:\s*(.*)$', line) if i < 12 else None
-        if m:
-            val = m.group(1)
-            quoted = len(val) >= 2 and val[0] == val[-1] and val[0] in '"'"'"'"'
-            inner = val[1:-1] if quoted else val
-            if len(inner) > LIMIT:
-                cut = inner[:LIMIT - 2].rsplit(' ', 1)[0].rstrip(' ,;:_-')
-                line = 'description: "' + cut + '..."'
-                changed = True
-                print('    truncated ' + name + ' description ' + str(len(inner)) + '->' + str(len(cut)+1) + ' (Codex 1024 limit)')
-        if strip_extra and i < 12 and re.match(r'^(sources|report_count):\s', line):
-            changed = True
-            continue
-        out.append(line)
-    if changed:
-        open(p, 'w', encoding='utf-8').write('\n'.join(out))
-"@
-        $truncFile = Join-Path $env:TEMP 'cbh_trunc.py'
-        Write-HuntFile $truncFile $trunc
-        $pyExe = $py[0]
-        $pyRest = @($py[1..($py.Length - 1)]) + @($truncFile, (Join-Path $HOME '.agents\skills'), "$(if ($NORMALIZE) { '1' } else { '0' })")
-        & $pyExe $pyRest
-        Remove-Item -LiteralPath $truncFile -Force -ErrorAction SilentlyContinue
+    Install-Skills (Join-Path $InstallHome '.agents\skills') 'agents'
+    Normalize-CodexSkills (Join-Path $InstallHome '.agents\skills')
+    if ($CODEX_ONLY) {
+        if (-not (Test-Path -LiteralPath $ManifestDir)) { New-Item -ItemType Directory -Force -Path $ManifestDir | Out-Null }
+        $entries = foreach ($d in (Get-ChildItem -LiteralPath $SkillsSource -Directory)) { "skills/$($d.Name)" }
+        Write-HuntFile $Manifest (($entries -join "`n") + "`n")
+        Write-Host "  + Install manifest ($($entries.Count) entries) -> $Manifest"
+        Write-Host "    Uninstall later with: powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexOnly -Uninstall"
+        Write-Host ''
     }
 }
-if ($DO_HERMES) { Install-Skills (Join-Path $HOME '.hermes\skills') 'hermes' }
-if ($DO_ANTIGRAVITY) { Install-Skills (Join-Path $HOME '.gemini\config\skills') 'antigravity' }
+if ($DO_HERMES) { Install-Skills (Join-Path $InstallHome '.hermes\skills') 'hermes' }
+if ($DO_ANTIGRAVITY) { Install-Skills (Join-Path $InstallHome '.gemini\config\skills') 'antigravity' }
 
 # --- opt-in Burp MCP wiring -------------------------------------------
 if ($DO_MCP) {
@@ -374,7 +395,8 @@ if ($DO_MCP) {
         if ($HAS_HERMES)      { $mcpTargets += '--hermes' }
         if ($HAS_ANTIGRAVITY) { $mcpTargets += '--antigravity' }
     } else {
-        if ($DO_AGENTS)      { $mcpTargets += '--opencode'; $mcpTargets += '--codex' }
+        if ($CODEX_ONLY)     { $mcpTargets += '--codex' }
+        elseif ($DO_AGENTS)  { $mcpTargets += '--opencode'; $mcpTargets += '--codex' }
         if ($DO_HERMES)      { $mcpTargets += '--hermes' }
         if ($DO_ANTIGRAVITY) { $mcpTargets += '--antigravity' }
     }
@@ -385,9 +407,11 @@ if ($DO_MCP) {
         if ($py) {
             $setupPy = Join-Path $RepoDir 'scripts\setup_harness_mcp.py'
             $pyExe = $py[0]
-            $pyRest = @($py[1..($py.Length - 1)]) + @($setupPy) + $mcpTargets
+            $pyRest = @()
+            if ($py.Length -gt 1) { $pyRest += $py[1..($py.Length - 1)] }
+            $pyRest += @($setupPy) + $mcpTargets
             try {
-                & $pyExe $pyRest
+                & $pyExe @pyRest
             } catch {
                 Write-Host "  ! Burp MCP wiring reported an issue -- see scripts/setup_harness_mcp.py output."
             }
@@ -403,15 +427,22 @@ Write-Host "============================================"
 Write-Host "+ Install complete"
 Write-Host "============================================"
 Write-Host ''
-Write-Host "Claude Code:        $(Join-Path $HOME '.claude\skills')  (+ commands, hunt.ps1)"
-if ($DO_AGENTS)      { Write-Host "Codex+OpenCode:     $(Join-Path $HOME '.agents\skills')" }
-if ($DO_HERMES)      { Write-Host "Hermes Agent:       $(Join-Path $HOME '.hermes\skills')" }
-if ($DO_ANTIGRAVITY) { Write-Host "Google AntiGravity: $(Join-Path $HOME '.gemini\config\skills')" }
+if ($INSTALL_CLAUDE) { Write-Host "Claude Code:        $(Join-Path $InstallHome '.claude\skills')  (+ commands, hunt.ps1)" }
+if ($DO_AGENTS) {
+    $agentsLabel = if ($CODEX_ONLY) { 'Codex' } else { 'Codex+OpenCode' }
+    Write-Host ("{0,-19} {1}" -f ($agentsLabel + ':'), (Join-Path $InstallHome '.agents\skills'))
+}
+if ($DO_HERMES)      { Write-Host "Hermes Agent:       $(Join-Path $InstallHome '.hermes\skills')" }
+if ($DO_ANTIGRAVITY) { Write-Host "Google AntiGravity: $(Join-Path $InstallHome '.gemini\config\skills')" }
 if (Test-Path -LiteralPath $BackupDest) { Write-Host "Backups:            $BackupDest  (outside loading paths)" }
 Write-Host ''
-if (-not $DETECT -and -not $DO_AGENTS -and -not $DO_HERMES -and -not $DO_ANTIGRAVITY) {
+if (-not $CODEX_ONLY -and -not $DETECT -and -not $DO_AGENTS -and -not $DO_HERMES -and -not $DO_ANTIGRAVITY) {
     Write-Host "Other harnesses?  pwsh ./scripts/install.ps1 -All   (auto-detects Codex / OpenCode / Hermes / AntiGravity)"
     Write-Host "See also: docs/multi-harness.md"
 }
 Write-Host ''
-Write-Host "Next: open a new PowerShell window (or '. `$PROFILE') and try:  hunt acme-test"
+if ($CODEX_ONLY) {
+    Write-Host "Next: start a new Codex thread and invoke:  `$bughunter hunt <authorized-target>"
+} else {
+    Write-Host "Next: open a new PowerShell window (or '. `$PROFILE') and try:  hunt acme-test"
+}

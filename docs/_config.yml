@@ -1,14 +1,14 @@
 # GitHub Pages config for the claude-bughunter docs site.
 # Built from the /docs folder. Uses just-the-docs for built-in search.
-title: claude-bughunter
+title: Codex-Bug-hunter
 description: >-
-  A Claude skill bundle that turns Claude Code into a senior bug-hunting
-  researcher and external red-team operator. 51+ skills, 681 disclosed-report
-  patterns, enterprise attack matrices, Burp MCP integration.
+  A provider-neutral Agent Skills bundle for OpenAI Codex and Claude Code.
+  Includes 84 skills, 681 disclosed-report patterns, enterprise attack
+  matrices, and optional Burp MCP integration.
 remote_theme: just-the-docs/just-the-docs
 
-url: "https://elementalsouls.github.io"
-baseurl: "/Claude-BugHunter"
+url: "https://hamoyeah.github.io"
+baseurl: "/Codex-Bug-hunter"
 
 # Search (just-the-docs built-in)
 search_enabled: true
@@ -19,7 +19,7 @@ search:
 # Repo links in the nav footer
 aux_links:
   "GitHub":
-    - "https://github.com/elementalsouls/Claude-BugHunter"
+    - "https://github.com/Hamoyeah/Codex-Bug-hunter"
   "Sponsor — Atlas Cloud":
     - "https://www.atlascloud.ai/console/coding-plan"
 aux_links_new_tab: true

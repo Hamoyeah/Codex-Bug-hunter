@@ -3,7 +3,7 @@
 # hunt — bug-bounty engagement scaffolding
 #
 # Adds a `hunt` shell function that creates a per-target working folder
-# under ~/Targets/ with CLAUDE.md, scope.md, submissions tracker,
+# under ~/Targets/ with AGENTS.md, a CLAUDE.md compatibility copy, scope.md, submissions tracker,
 # findings folder, evidence folder (gitignored), and notes scratchpad.
 #
 # Usage:
@@ -38,17 +38,17 @@ hunt() {
 
   mkdir -p "$dir/findings" "$dir/evidence"
 
-  # ============== CLAUDE.md ==============
+  # ============== AGENTS.md + CLAUDE.md compatibility copy ==============
   # Write heading lines that require $target interpolation explicitly,
   # then append the static body via a quoted heredoc (no shell injection risk).
-  printf '# Engagement: %s\n\n' "$target" > "$dir/CLAUDE.md"
-  printf '**Target:** %s\n' "$target" >> "$dir/CLAUDE.md"
-  printf '**Started:** %s\n' "$(date -u +"%Y-%m-%d")" >> "$dir/CLAUDE.md"
-  cat >> "$dir/CLAUDE.md" <<'CLAUDEMD'
+  printf '# Engagement: %s\n\n' "$target" > "$dir/AGENTS.md"
+  printf '**Target:** %s\n' "$target" >> "$dir/AGENTS.md"
+  printf '**Started:** %s\n' "$(date -u +"%Y-%m-%d")" >> "$dir/AGENTS.md"
+  cat >> "$dir/AGENTS.md" <<'CLAUDEMD'
 **Platform:** [TBD — Bugcrowd / HackerOne / Intigriti / Immunefi / private]
 **Program URL:** [paste the program page URL here]
 
-## Quick context for Claude
+## Quick context for the coding agent
 
 This folder is the working directory for a single bug-bounty engagement.
 Files in this folder:
@@ -70,7 +70,7 @@ Files in this folder:
 3. **Hunt** — `web2-vuln-classes` (or per-class `hunt-*` skills if installed)
    plus `security-arsenal` for payloads.
 
-4. **Validate** — run `/triage` on every lead BEFORE drafting a report.
+4. **Validate** — run the `bughunter triage` workflow on every lead BEFORE drafting a report.
    Apply the 7-Question Gate from `triage-validation`.
 
 5. **Capture evidence** — `evidence-hygiene` BEFORE any screenshot.
@@ -90,21 +90,22 @@ Files in this folder:
 - Test-account email: `<your-bugcrowdninja-alias>@bugcrowdninja.com`
 - Burp proxy capturing through all browser sessions for this target.
 
-## Useful commands during the engagement
+## Useful BugHunter modes during the engagement
 
-- `/scope <asset>` — verify a specific asset is in scope
-- `/triage` — quick 7-Question Gate on a finding
-- `/validate` — full 4-gate finding validator
-- `/report` — draft a submission-ready report
-- `/remember` — log a finding to hunt memory
+- `bughunter scope <asset>` — verify a specific asset is in scope
+- `bughunter triage` — quick 7-Question Gate on a finding
+- `bughunter validate` — full 4-gate finding validator
+- `bughunter report` — draft a submission-ready report
+- `bughunter remember` — log a finding to hunt memory
 CLAUDEMD
+  cp "$dir/AGENTS.md" "$dir/CLAUDE.md"
 
   # ============== scope.md ==============
   printf '# Scope — %s\n' "$target" > "$dir/scope.md"
   cat >> "$dir/scope.md" <<'SCOPEMD'
 
 > Parse this from the program page (Bugcrowd / HackerOne / etc.) before
-> doing any active testing. `/scope <asset>` can verify individual assets.
+> doing any active testing. `bughunter scope <asset>` can verify individual assets.
 
 ## In scope
 
@@ -159,7 +160,7 @@ SCOPEMD
 # Format (tab-separated):
 # <UUID>  <severity>  <VRT-or-class>  <one-line title>
 #
-# Use `/remember` after each submission to append the new ID and link
+# Use `bughunter remember` after each submission to append the new ID and link
 # back to chained primitives.
 
 SUBSEOF
@@ -266,11 +267,12 @@ PYIN
   fi
 
   # ============== confirmation ==============
-  echo "Initialized $dir with CLAUDE.md and engagement template."
+  echo "Initialized $dir with AGENTS.md, CLAUDE.md, and the engagement template."
   echo "cd $dir to start hacking."
   echo ""
   echo "Files created:"
-  echo "  CLAUDE.md           - Claude Code engagement context"
+  echo "  AGENTS.md           - Codex and Agent Skills engagement context"
+  echo "  CLAUDE.md           - Claude Code compatibility copy"
   echo "  scope.md            - parsed scope template (fill from program page)"
   echo "  submissions.txt     - submission UUID tracker"
   echo "  findings/README.md  - findings folder convention"

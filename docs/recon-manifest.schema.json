@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/elementalsouls/Claude-BugHunter/blob/main/docs/recon-manifest.schema.json",
+  "$id": "https://github.com/Hamoyeah/Codex-Bug-hunter/blob/main/docs/recon-manifest.schema.json",
   "title": "Recon → Hunt Manifest",
   "description": "Data contract between the recon phase (cbh recon / offensive-osint) and the hunt phase (hunt / cbh surface / /hunt).",
   "type": "object",

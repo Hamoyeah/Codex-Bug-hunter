@@ -7,14 +7,15 @@ known finding, or re-testing a vuln_class that never pays off on this tech stack
 Capture is harvested from the engine's own state; skip is gated (off unless the
 engine passes use_memory, i.e. token-saving modes only).
 
-Storage (~/.claude/bughunter/memory/, override BUGHUNTER_MEMORY_DIR):
+Storage (~/.bughunter/memory/, override BUGHUNTER_MEMORY_DIR). When an agent
+sandbox cannot write to the home directory, storage falls back to the current
+workspace's .bughunter/memory directory:
   findings.jsonl       one row per confirmed finding (cross-target)
   negatives.jsonl      (host, stack_sig, vuln_class) hunted -> not confirmed
   targets/<host>.json  per-target rollup for /pickup
 
 stdlib-only; imports nothing from sibling engine modules.
 """
-import fcntl
 import json
 import os
 import sys
@@ -25,16 +26,45 @@ SCHEMA_VERSION = 1
 MAX_BYTES = 10 * 1024 * 1024        # rotate a JSONL past 10 MB
 KEEP = 3                            # backups kept: .1 (newest) .. .3
 DEAD_CLASS_THRESHOLD = 5           # negatives before a (stack,class) is "dead"
+_ACTIVE_ROOT = None
+
+try:                                # POSIX
+    import fcntl                    # type: ignore
+except ImportError:                 # Windows
+    fcntl = None
+    import msvcrt                   # type: ignore
+
+
+def _candidate_roots():
+    configured = os.environ.get("BUGHUNTER_MEMORY_DIR")
+    if configured:
+        return [os.path.abspath(os.path.expanduser(configured))]
+    neutral = os.path.expanduser("~/.bughunter/memory")
+    legacy = os.path.expanduser("~/.claude/bughunter/memory")
+    workspace = os.path.abspath(os.path.join(os.getcwd(), ".bughunter", "memory"))
+    roots = [legacy, neutral, workspace] if os.path.isdir(legacy) and not os.path.exists(neutral) \
+        else [neutral, workspace, legacy]
+    return list(dict.fromkeys(os.path.abspath(root) for root in roots))
 
 
 def _root():
-    return os.path.expanduser(os.environ.get("BUGHUNTER_MEMORY_DIR", "~/.claude/bughunter/memory"))
+    if _ACTIVE_ROOT:
+        return _ACTIVE_ROOT
+    roots = _candidate_roots()
+    return next((root for root in roots if os.path.isdir(root)), roots[0])
 
 
 def _paths():
-    root = _root()
-    os.makedirs(os.path.join(root, "targets"), exist_ok=True)
-    return root
+    global _ACTIVE_ROOT
+    last_error = None
+    for root in _candidate_roots():
+        try:
+            os.makedirs(os.path.join(root, "targets"), exist_ok=True)
+            _ACTIVE_ROOT = root
+            return root
+        except OSError as exc:
+            last_error = exc
+    raise last_error or OSError("no writable bughunter memory directory")
 
 
 def _now():
@@ -71,14 +101,24 @@ def _rotate_if_needed(path):
 def _append(path, obj):
     line = json.dumps(obj, separators=(",", ":")) + "\n"
     lock = str(path) + ".lock"
-    lfd = os.open(lock, os.O_WRONLY | os.O_CREAT, 0o644)
+    lfd = os.open(lock, os.O_RDWR | os.O_CREAT, 0o644)
     try:
-        fcntl.flock(lfd, fcntl.LOCK_EX)
+        if fcntl is not None:
+            fcntl.flock(lfd, fcntl.LOCK_EX)
+        else:
+            if os.path.getsize(lock) == 0:
+                os.write(lfd, b"\0")
+            os.lseek(lfd, 0, os.SEEK_SET)
+            msvcrt.locking(lfd, msvcrt.LK_LOCK, 1)
         _rotate_if_needed(path)                      # now inside the lock: no cross-process rename race
         with open(path, "ab") as f:
             f.write(line.encode("utf-8"))
     finally:
-        fcntl.flock(lfd, fcntl.LOCK_UN)
+        if fcntl is not None:
+            fcntl.flock(lfd, fcntl.LOCK_UN)
+        else:
+            os.lseek(lfd, 0, os.SEEK_SET)
+            msvcrt.locking(lfd, msvcrt.LK_UNLCK, 1)
         os.close(lfd)
 
 
@@ -146,7 +186,8 @@ def _write_rollup(host, tech_stack, tested, confirmed):
     prev = {}
     if os.path.exists(p):
         try:
-            prev = json.load(open(p))
+            with open(p, encoding="utf-8") as handle:
+                prev = json.load(handle)
         except Exception:
             prev = {}
     hc_conf = [f for f in confirmed if _host(f.get("url", "")) == host]
@@ -160,7 +201,8 @@ def _write_rollup(host, tech_stack, tested, confirmed):
                       for f in hc_conf],
     }
     tmp = p + ".tmp"
-    json.dump(doc, open(tmp, "w"), indent=2)
+    with open(tmp, "w", encoding="utf-8") as handle:
+        json.dump(doc, handle, indent=2, ensure_ascii=False)
     os.replace(tmp, p)
 
 
@@ -206,8 +248,17 @@ def skip_decision(host, tech_stack, item):
 
 
 def rollup(host):
-    p = os.path.join(_root(), "targets", f"{host}.json")
-    return json.load(open(p)) if os.path.exists(p) else None
+    roots = [_ACTIVE_ROOT] if _ACTIVE_ROOT else []
+    roots += [root for root in _candidate_roots() if root not in roots]
+    for root in roots:
+        p = os.path.join(root, "targets", f"{host}.json")
+        try:
+            if os.path.exists(p):
+                with open(p, encoding="utf-8") as handle:
+                    return json.load(handle)
+        except OSError:
+            continue
+    return None
 
 
 def gc(action="report", max_mb=10, keep=KEEP, root=None):
@@ -245,7 +296,8 @@ def _selftest():
         negs = _read(os.path.join(d, "negatives.jsonl"))
         assert any(n["vuln_class"] == "xss" for n in negs)          # xss tested, not confirmed -> negative
         assert not any(n["vuln_class"] == "idor" for n in negs)     # idor confirmed -> no negative
-        assert json.load(open(os.path.join(d, "targets", "a.com.json")))["sessions"] == 1
+        with open(os.path.join(d, "targets", "a.com.json"), encoding="utf-8") as handle:
+            assert json.load(handle)["sessions"] == 1
         # skip_decision: known-confirmed carries the finding
         skip_res = skip_decision("a.com", ["nextjs"], {"url": "http://a.com/x", "param": "id", "vuln_class": "idor"})
         assert skip_res["skip"] and skip_res["reason"] == "known-confirmed" and skip_res["carry"]["verdict"]["real"] is True
@@ -270,7 +322,7 @@ if __name__ == "__main__":
     ap.add_argument("--gc", action="store_true", help="run garbage-collection instead of the self-test")
     ap.add_argument("--rotate", action="store_true", help="with --gc: rotate files over the cap")
     ap.add_argument("--purge-backups", action="store_true", help="with --gc: delete all .1/.2/.3 backups")
-    ap.add_argument("--dir", default=None, help="ledger dir (default ~/.claude/bughunter/memory)")
+    ap.add_argument("--dir", default=None, help="ledger dir (default ~/.bughunter/memory)")
     ap.add_argument("--max-mb", type=int, default=10)
     a = ap.parse_args()
     if a.gc:

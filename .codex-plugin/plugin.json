@@ -1,0 +1,28 @@
+{
+  "name": "claude-bughunter",
+  "version": "2.2.0",
+  "description": "Provider-neutral bug-hunting and external red-team skill bundle for Claude Code and OpenAI Codex.",
+  "author": {
+    "name": "Sachin Sharma",
+    "url": "https://github.com/elementalsouls"
+  },
+  "homepage": "https://github.com/Hamoyeah/Codex-Bug-hunter",
+  "repository": "https://github.com/Hamoyeah/Codex-Bug-hunter",
+  "license": "MIT",
+  "keywords": ["security", "bug-bounty", "red-team", "codex", "agent-skills"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Claude-BugHunter",
+    "shortDescription": "Authorized bug hunting and red-team workflows",
+    "longDescription": "Agent Skills, deterministic tooling, and guarded workflows for authorized bug-bounty, WAPT, Web3, and external red-team engagements.",
+    "developerName": "Sachin Sharma",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://github.com/Hamoyeah/Codex-Bug-hunter",
+    "defaultPrompt": [
+      "Use BugHunter to map this authorized target's attack surface.",
+      "Triage this finding with the BugHunter validation gates.",
+      "Draft a report from this validated finding."
+    ]
+  }
+}

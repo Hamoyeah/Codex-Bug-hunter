@@ -6,7 +6,14 @@ versioning is loosely [SemVer](https://semver.org/) at the bundle level.
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-09-19
+
 ### Added
+- **Native OpenAI Codex distribution** — adds a `bughunter` Agent Skills router for all
+  15 workflows, portable plugin manifests, root `AGENTS.md`, Codex-only installers,
+  `codex exec` support in the autonomous engine, Windows-safe UTF-8/file locking, and a
+  workspace-local memory fallback for restricted sandboxes. All 84 skills now pass the
+  official Agent Skills validator and preserve provenance outside strict frontmatter.
 - **Disclosed-report grounding, content-verified** — 28 `hunt-*` skills strengthened
   with cited public HackerOne disclosures. **433 distinct disclosed reports** are now
   individually cited across **36 pattern-library files** in `docs/disclosed-reports/`.
@@ -36,8 +43,8 @@ versioning is loosely [SemVer](https://semver.org/) at the bundle level.
   and `recon-scope-triage`; 11 existing skills expanded with verified technique content. Hunt
   sub-stack 48 → 57. `hunt-ai-attacks` folded into `hunt-llm-ai` (was a frontmatter-less duplicate).
 - **Claude Code plugin marketplace** — `.claude-plugin/marketplace.json` + `.claude-plugin/plugin.json`
-  make the bundle installable natively: `/plugin marketplace add elementalsouls/Claude-BugHunter`
-  then `/plugin install claude-bughunter@elementalsouls`. Skills load namespaced under
+  make the bundle installable natively: `/plugin marketplace add Hamoyeah/Codex-Bug-hunter`
+  then `/plugin install claude-bughunter@hamoyeah`. Skills load namespaced under
   `claude-bughunter:` and update on version bump. The `scripts/install.sh` copy method stays as a
   fallback. This is the convention used by Anthropic's own marketplaces and Trail of Bits.
 - **Multi-harness install** — the 82 Agent Skills now run on **OpenCode, OpenAI Codex CLI, and
@@ -151,6 +158,7 @@ versioning is loosely [SemVer](https://semver.org/) at the bundle level.
 - Initial public release: 51 skills + 15 slash commands, vendored foundation from
   `shuvonsec/claude-bug-bounty`, Burp MCP integration, recon pipeline.
 
-[Unreleased]: https://github.com/elementalsouls/Claude-BugHunter/compare/v2.1...HEAD
+[Unreleased]: https://github.com/Hamoyeah/Codex-Bug-hunter/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/Hamoyeah/Codex-Bug-hunter/releases/tag/v2.2.0
 [2.1]: https://github.com/elementalsouls/Claude-BugHunter/compare/v2.0...v2.1
 [2.0]: https://github.com/elementalsouls/Claude-BugHunter/releases/tag/v2.0

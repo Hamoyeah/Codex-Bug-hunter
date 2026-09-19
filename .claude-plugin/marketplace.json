@@ -1,24 +1,24 @@
 {
-  "name": "elementalsouls",
+  "name": "hamoyeah",
   "owner": {
     "name": "Sachin Sharma",
     "url": "https://github.com/elementalsouls"
   },
   "metadata": {
     "description": "Offensive-security skill bundles for Claude Code by ElementalSoul.",
-    "version": "2.1.0"
+    "version": "2.2.0"
   },
   "plugins": [
     {
       "name": "claude-bughunter",
       "source": "./",
-      "description": "83-skill bug-hunting & external red-team bundle — 58 hunt-* web/vuln-class + framework skills, enterprise platform attack chains (M365/Entra, Okta, SharePoint, vCenter, SSL-VPN, APK/iOS), recon/OSINT, reporting & validation gates, Burp MCP integration. Skills auto-load by topic; 15 slash commands.",
-      "version": "2.1.0",
+      "description": "84-skill provider-neutral bug-hunting and external red-team bundle for Claude Code and OpenAI Codex, with 15 Claude slash commands and a Codex workflow router.",
+      "version": "2.2.0",
       "author": {
         "name": "Sachin Sharma",
         "url": "https://github.com/elementalsouls"
       },
-      "homepage": "https://elementalsouls.github.io/Claude-BugHunter",
+      "homepage": "https://github.com/Hamoyeah/Codex-Bug-hunter",
       "category": "security",
       "tags": [
         "security",

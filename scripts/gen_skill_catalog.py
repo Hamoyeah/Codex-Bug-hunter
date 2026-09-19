@@ -11,15 +11,18 @@ Reads name/description/report_count from each skills/<name>/SKILL.md and writes 
 searchable, grouped catalog page (Jekyll front matter included for the docs site).
 Stdlib only.
 """
+import json
 import os
 import re
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKILLS_DIR = os.path.join(REPO, "skills")
 OUT = os.path.join(REPO, "docs", "skills.md")
+PROVENANCE = os.path.join(REPO, "metadata", "skill-provenance.json")
 
 # Grouping by name prefix / known membership. Order defines section order.
 GROUPS = [
+    ("Workflow routing", lambda n: n == "bughunter"),
     ("Hunt — web app vuln classes", lambda n: n.startswith("hunt-")),
     ("Enterprise platform attack", lambda n: n in {
         "m365-entra-attack", "okta-attack", "cloud-iam-deep", "vmware-vcenter-attack",
@@ -34,9 +37,9 @@ GROUPS = [
 ]
 
 
-def parse_frontmatter(path):
+def parse_frontmatter(path, provenance):
     name = desc = ""
-    report_count = None
+    report_count = provenance.get("report_count")
     with open(path, encoding="utf-8") as fh:
         raw = fh.read()
     if not raw.startswith("---"):
@@ -68,11 +71,15 @@ def first_sentence(text, limit=240):
 
 
 def main():
+    provenance = {}
+    if os.path.isfile(PROVENANCE):
+        with open(PROVENANCE, encoding="utf-8") as fh:
+            provenance = json.load(fh)
     skills = []
     for d in sorted(os.listdir(SKILLS_DIR)):
         sp = os.path.join(SKILLS_DIR, d, "SKILL.md")
         if os.path.isfile(sp):
-            fm = parse_frontmatter(sp)
+            fm = parse_frontmatter(sp, provenance.get(d, {}))
             if fm and fm["name"]:
                 skills.append(fm)
 

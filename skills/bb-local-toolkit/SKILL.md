@@ -1,7 +1,6 @@
 ---
 name: bb-local-toolkit
-description: Local-tooling companion to the bug-bounty orchestrator — carries the SAME complete bug-bounty workflow, but reach for THIS variant when you also need to resolve where tools, wordlists, and clones are installed on the local machine (jhaddix, SecLists, trufflehog, ffuf, dalfox, ghauri); for pure orchestration/routing use the bug-bounty skill. Workflow it covers — recon (subdomain enumeration, asset discovery, fingerprinting, HackerOne scope, source code audit), pre-hunt learning (disclosed reports, tech stack research, mind maps, threat modeling), vulnerability hunting (IDOR, SSRF, XSS, auth bypass, CSRF, race conditions, SQLi, XXE, file upload, business logic, GraphQL, HTTP smuggling, cache poisoning, OAuth, timing side-channels, OIDC, SSTI, subdomain takeover, cloud misconfig, ATO chains, agentic AI), LLM/AI security testing (chatbot IDOR, prompt injection, indirect injection, ASCII smuggling, exfil channels, RCE via code tools, system prompt extraction, ASI01-ASI10), A-to-B bug chaining (IDOR→auth bypass, SSRF→cloud metadata, XSS→ATO, open redirect→OAuth theft, S3→bundle→secret→OAuth), bypass tables (SSRF IP bypass, open redirect bypass, file upload bypass), language-specific grep (JS prototype pollution, Python pickle, PHP type juggling, Go template.HTML, Ruby YAML.load, Rust unwrap), and reporting (7-Question Gate, 4 validation gates, human-tone writing, templates by vuln class, CVSS 3.1, PoC generation, always-rejected list, conditional chain table, submission checklist). Use when you need the local install path of a tool / wordlist / clone for a hunt, or as the full-workflow variant when operating from this local toolkit; for general routing use the bug-bounty skill. 中文触发词：漏洞赏金、安全测试、渗透测试、漏洞挖掘、信息收集、子域名枚举、XSS测试、SQL注入、SSRF、安全审计、漏洞报告
-sources: community, operator_experience
+description: Local-tooling companion for authorized bug-bounty workflows. Use when recon, vulnerability testing, validation, chaining, or reporting also requires locating installed tools, wordlists, and clones such as SecLists, ffuf, dalfox, ghauri, or trufflehog. Use bug-bounty for provider-neutral workflow routing without local path discovery.
 ---
 
 # Bug Bounty Master Workflow
@@ -1530,22 +1529,19 @@ When payout is being downgraded, use these counters:
 
 ---
 
-# INSTALLATION (Claude Code Skill)
+# INSTALLATION (Agent Skill)
 
-To use this as a Claude Code skill, copy this file to your skills directory:
+Install the complete bundle so related workflows and references stay together:
 
 ```bash
-# Option A: Clone the repo and link the skill
-git clone https://github.com/shuvonsec/claude-bug-bounty.git ~/.claude/skills/bug-bounty
-ln -s ~/.claude/skills/bug-bounty/SKILL.md ~/.claude/skills/bug-bounty/SKILL.md
+# Codex
+bash scripts/install.sh --codex-only
 
-# Option B: Direct copy
-mkdir -p ~/.claude/skills/bug-bounty
-curl -s https://raw.githubusercontent.com/shuvonsec/claude-bug-bounty/main/SKILL.md \
-  -o ~/.claude/skills/bug-bounty/SKILL.md
+# Claude Code
+bash scripts/install.sh
 ```
 
-Then in Claude Code, this skill loads automatically when you ask about bug bounty, recon, or vulnerability hunting.
+The skill then loads automatically in either supported agent when you ask about bug bounty, recon, or vulnerability hunting.
 
 ---
 

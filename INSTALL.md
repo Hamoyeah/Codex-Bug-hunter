@@ -4,14 +4,14 @@ Step-by-step setup for the Claude-BugHunter skill bundle.
 
 ## Prerequisites
 
-- **Claude Code** — install from https://claude.ai/download
+- **OpenAI Codex or Claude Code** — install the agent you intend to use
 - **macOS, Linux, or Windows** — macOS/Linux use the bash installers; Windows uses the native PowerShell installers
 - **Python 3.9+** — for the `cbh` CLI runner
 
 ### Optional (recommended but not required)
 
 - **Burp Suite** Professional or Community — https://portswigger.net/burp. `cbh --burp` routes traffic through Burp's proxy. Without Burp, the CLI runs in curl-only mode and everything still works.
-- **Burp MCP Server** (BApp Store extension) — adds conversational hunting via Claude Code. Optional layer on top of Burp Pro. Skip if you don't have Burp.
+- **Burp MCP Server** (BApp Store extension) — adds conversational hunting via Codex or Claude Code. Optional layer on top of Burp Pro. Skip if you don't have Burp.
 - **`subfinder`** (ProjectDiscovery) — improves passive subdomain enum. Without it, `cbh recon` falls back to crt.sh alone.
 - **Java** — required for Burp MCP if you install it.
 
@@ -21,7 +21,7 @@ Step-by-step setup for the Claude-BugHunter skill bundle.
 |---|---|---|
 | **Curl-only** | Just Python 3.9+ | Quick hunts, scripted automation, no GUI |
 | **Burp proxy** (`cbh --burp`) | Add Burp Suite Pro/Community | All `cbh` traffic logged in Burp; one click to Repeater |
-| **Burp MCP** (conversational) | Burp Pro + MCP extension + Claude Code MCP setup | Maximum LLM-driven workflow inside Claude Code |
+| **Burp MCP** (conversational) | Burp Pro + MCP extension + provider MCP setup | Maximum agent-driven workflow inside Codex or Claude Code |
 
 All three modes are first-class supported. The skills + CLI work identically across them — you pick based on what you have installed and how you like to work.
 
@@ -36,11 +36,28 @@ New-Item -ItemType Directory -Force -Path "$HOME\security-research"
 cd "$HOME\security-research"
 
 # both
-git clone https://github.com/elementalsouls/Claude-BugHunter.git
-cd Claude-BugHunter
+git clone https://github.com/Hamoyeah/Codex-Bug-hunter.git
+cd Codex-Bug-hunter
 ```
 
 ## Step 2 — Run the installer
+
+For Codex only:
+
+```bash
+bash scripts/install.sh --codex-only
+```
+
+```powershell
+# Windows PowerShell 5.1+; no pwsh installation required
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexOnly
+```
+
+This installs all 84 skills, including the provider-neutral `bughunter` workflow router,
+under `~/.agents/skills`. It does not touch Claude settings or your shell profile. Start a
+new Codex thread after installation.
+
+For Claude Code:
 
 ```bash
 # macOS / Linux
@@ -58,7 +75,7 @@ pwsh ./scripts/install.ps1
 > script aborts with a `syntax error` and cannot fix itself.
 
 This copies:
-- All 83 skills → `~/.claude/skills/` (macOS/Linux) or `%USERPROFILE%\.claude\skills\` (Windows)
+- All 84 skills → `~/.claude/skills/` (macOS/Linux) or `%USERPROFILE%\.claude\skills\` (Windows)
 - All 15 slash commands → `~/.claude/commands/`
 - The `hunt` scaffolder → `~/.claude/scripts/hunt.sh` (sourced from your `.zshrc`/`.bashrc`) on macOS/Linux, or `~\.claude\scripts\hunt.ps1` (dot-sourced from your PowerShell `$PROFILE`) on Windows
 
@@ -71,7 +88,8 @@ The skills are plain Agent Skills, so they also run outside Claude Code:
 ```bash
 # macOS / Linux
 ./scripts/install.sh --all          # also installs to ~/.agents/skills (Codex/OpenCode), ~/.hermes/skills (Hermes), and ~/.gemini/config/skills (AntiGravity)
-./scripts/install.sh --agents       # just Codex + OpenCode
+./scripts/install.sh --codex-only   # Codex only; does not install or modify Claude
+./scripts/install.sh --agents       # Claude plus Codex/OpenCode
 ./scripts/install.sh --hermes       # just Hermes
 ./scripts/install.sh --antigravity  # just Google AntiGravity
 ./scripts/install.sh --agents --burp-mcp   # also wire your Burp MCP into those harnesses
@@ -80,13 +98,14 @@ The skills are plain Agent Skills, so they also run outside Claude Code:
 ```powershell
 # Windows (PowerShell)
 pwsh ./scripts/install.ps1 -All          # Codex + OpenCode + Hermes + Google AntiGravity
-pwsh ./scripts/install.ps1 -Agents       # just Codex + OpenCode
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexOnly # Codex only
+pwsh ./scripts/install.ps1 -Agents       # Claude plus Codex/OpenCode
 pwsh ./scripts/install.ps1 -Hermes       # just Hermes
 pwsh ./scripts/install.ps1 -AntiGravity  # just Google AntiGravity
 pwsh ./scripts/install.ps1 -Agents -BurpMcp   # also wire your Burp MCP into those harnesses
 ```
 
-Slash commands, the plugin marketplace, and the `/hunt` engine are Claude-Code-only; other harnesses get the skill knowledge + Burp MCP. Full details and per-harness MCP snippets: [`docs/multi-harness.md`](docs/multi-harness.md).
+Claude keeps the original slash commands. Codex gets equivalent modes through `$bughunter`; the autonomous engine supports `--provider codex`. Full details: [`docs/multi-harness.md`](docs/multi-harness.md).
 
 ## Step 3 — (Optional) Set up Burp MCP
 
@@ -107,6 +126,13 @@ claude mcp add burp -s user -- java -jar ~/.BurpSuite/mcp-proxy/mcp-proxy-all.ja
 ```powershell
 # Windows (PowerShell)
 claude mcp add burp -s user -- java -jar "$HOME\.BurpSuite\mcp-proxy\mcp-proxy-all.jar"
+```
+
+For Codex, register the same stdio server directly:
+
+```powershell
+codex.cmd mcp add burp -- java -jar "$HOME\.BurpSuite\mcp-proxy\mcp-proxy-all.jar"
+codex.cmd mcp list
 ```
 
 Verify in a fresh `claude` session:
@@ -239,16 +265,18 @@ Then go find a real program and put it to work. See [USAGE.md](USAGE.md) for the
 
 ## Uninstall
 
-The installer writes a manifest of exactly what it placed (under
-`~/.claude/.skill-manifests/claude-bughunter.txt`). Remove that footprint — and
-**only** that footprint — with:
+The installer writes a manifest of exactly what it placed under `~/.claude/.skill-manifests/`
+or, for a Codex-only install, `~/.agents/.skill-manifests/`. Remove that footprint — and
+**only** that footprint — with the matching command:
 
 ```bash
 # macOS / Linux
 bash scripts/install.sh --uninstall
+bash scripts/install.sh --codex-only --uninstall  # Codex-only install
 
 # Windows (PowerShell)
-pwsh ./scripts/install.ps1 -Uninstall
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Uninstall
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexOnly -Uninstall
 ```
 
 This removes the bundle's skills, slash commands, the `hunt.sh`/`hunt.ps1` script, and its
@@ -260,4 +288,5 @@ so uninstalling one bundle never breaks the other. (Install backups under
 
 If you installed via the **plugin** instead of the script: `/plugin uninstall claude-bughunter@elementalsouls`.
 
-Burp MCP, if you wired it, is removed separately: `claude mcp remove burp`.
+Burp MCP, if you wired it, is removed separately: `claude mcp remove burp` or
+`codex mcp remove burp`, depending on the provider.

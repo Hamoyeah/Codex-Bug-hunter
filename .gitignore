@@ -35,6 +35,7 @@ targets/
 # Local-only artifacts
 .obsidian/
 graphify-out/
+.bughunter/
 
 # Secrets
 .env

@@ -1,8 +1,6 @@
 ---
 name: redteam-mindset
 description: Red-team operator discipline — the mindset corrections that separate offensive testing from defensive WAPT. Built from authorized red-team work where conservative defaults caused multiple findings to be missed and one to be incorrectly retracted. Use at the START of any red-team engagement and again whenever feeling stuck or considering "stopping" on a defended target. The single most important skill to load when scope is "external red team" not "bug bounty / WAPT".
-sources: authorized-engagement
-report_count: 1
 ---
 
 ## When to use this skill
@@ -36,7 +34,7 @@ The 9 corrections below are nuance. THIS is the core. If you only retain one thi
 
 ### Authorization given at engagement start covers the entire engagement.
 
-Do not insert mid-engagement permission gates. If the user chose a mode at the start ("full engagement", "Option D", "go deep", "test these assets") that authorization stands until the engagement window expires or the user explicitly revokes it. **`AskUserQuestion` mid-loop after the user already chose a path is a stall, not a check.**
+Do not insert redundant mid-engagement permission gates. If the user chose a mode at the start ("full engagement", "Option D", "go deep", "test these assets"), that choice stands until the engagement window expires or the user explicitly revokes it. A repeated provider-specific follow-up prompt after the operator already chose a path is a stall, not a check.
 
 ### Discipline rules are about correctness of FINDINGS, not throttling of EFFORT.
 
@@ -74,7 +72,7 @@ These all came out of a real engagement (authorized-engagement revalidation, 202
 6. **"OpenAPI exposed → finding logged"** with only 4 of N endpoints probed. Every endpoint × every relevant test class. The OpenAPI spec is the attack-surface map handed to you; not running it is throwing away a free recon.
 7. **"APK retest deferred — needs tooling."** `brew install jadx`, apkpure direct download, `apk-redteam-pipeline` already documents the flow. Five minutes of setup, not "another session."
 8. **Volume framed as a problem.** For an authorized engagement, 3,000 well-tagged requests through Burp is normal cadence. Bug-bounty hunters at full pace exceed that per *hour*. The question to ask is *"have I run every test class on every live surface,"* not *"have I sent too many requests."*
-9. **Inserting `AskUserQuestion` at any decision point inside an active engagement loop.** If the user picked a mode at start, that mode is in effect until revoked. Choosing operationally between e.g. SAML acs raw POST vs SAML acs replay is a *technical* decision the operator can make and document — it does not require user pre-approval.
+9. **Inserting a redundant provider-specific follow-up question at every decision point inside an active engagement loop.** If the user picked a mode at start, that mode is in effect until revoked. Choosing operationally between e.g. SAML ACS raw POST vs SAML ACS replay is a *technical* decision the operator can make and document — it does not require repeated approval.
 10. **Skill-gap-as-stop-condition.** "No `hunt-zoho` skill exists, so I logged a v1.1 gap and moved on." NO. If a hunt-* skill doesn't exist for a discovered tech stack, do the same work *manually* using the vendor's public check matrix. Log the gap in v1.1 roadmap *and* run the checks now.
 
 ### Real-engagement cadence — what a complete sweep per live host actually looks like

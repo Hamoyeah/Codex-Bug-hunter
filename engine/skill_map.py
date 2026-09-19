@@ -9,8 +9,8 @@ their 20% expert effort where the 80% automation points:
     surface (endpoint / parameter)  ->  attack class  ->  which hunt-* skill  ->  first curl
 
 Mappings are grounded in the skills actually installed (auto-detected: the bundle's own
-skills/ for repo/plugin installs, or ~/.claude/skills for the copy installer, overridable
-via $CBH_SKILLS_DIR); anything not present is filtered out so we never point at a skill
+skills/ for repo/plugin installs, ~/.agents/skills for Codex, or ~/.claude/skills for
+Claude Code, overridable via $CBH_SKILLS_DIR); anything not present is filtered out so we never point at a skill
 that isn't there.
 Active testing is curl-first; Burp MCP is optional (only where noted — OOB/blind/fuzzing).
 """
@@ -25,7 +25,8 @@ def _resolve_skills_dir():
       2. skills/ shipped next to the engine — works for both a repo checkout and a
          Claude Code plugin install (the whole bundle lives in the plugin cache, so
          engine/ and skills/ stay siblings there too).
-      3. ~/.claude/skills — the target of the scripts/install.sh copy method.
+      3. ~/.agents/skills — Codex's shared Agent Skills location.
+      4. ~/.claude/skills — Claude Code's copy-install location.
     """
     env = os.environ.get("CBH_SKILLS_DIR")
     if env:
@@ -35,6 +36,9 @@ def _resolve_skills_dir():
     )
     if os.path.isdir(bundled):
         return bundled
+    agents = os.path.expanduser("~/.agents/skills")
+    if os.path.isdir(agents):
+        return agents
     return os.path.expanduser("~/.claude/skills")
 
 

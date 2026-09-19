@@ -18,7 +18,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = sys.argv[1] if len(sys.argv) > 1 else "elementalsouls/Claude-BugHunter"
+REPO = sys.argv[1] if len(sys.argv) > 1 else "Hamoyeah/Codex-Bug-hunter"
 OUT = Path(__file__).resolve().parent.parent / "assets"
 
 # Validated with the dataviz palette validator against GitHub's real surfaces:
@@ -169,7 +169,8 @@ def main():
     print(f"fetching stargazers for {REPO} …")
     stamps = fetch_stars(REPO)
     if not stamps:
-        sys.exit("no stargazer data returned — is `gh` authenticated?")
+        print("no stargazer data yet; keeping the committed chart unchanged")
+        return
     series = build_series(stamps)
     print(f"  {len(stamps):,} stars, {series[0][0]:%Y-%m-%d} → {series[-1][0]:%Y-%m-%d}")
     OUT.mkdir(exist_ok=True)

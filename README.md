@@ -1,10 +1,15 @@
 ![claude-bughunter banner](assets/banner-v2.svg)
 
-# claude-bughunter
+# Codex-Bug-hunter
 
-> A self-contained Claude skill bundle for bug hunting and external red-team work · **83 skills** · 15 slash commands · **681 disclosed-report patterns** (433 now individually cited & auditable) across 24 core vulnerability classes · enterprise identity + infrastructure attack matrices · engagement-folder scaffolding · Burp MCP integration · battle-tested across authorized red-team and bug-hunting engagements, plus public training platforms (DVWA, OWASP Juice Shop, Hacker101, testphp.vulnweb.com).
+> A provider-neutral Agent Skills bundle for bug hunting and external red-team work · **84 skills** · 15 Claude slash commands + a Codex workflow router · **681 disclosed-report patterns** (433 now individually cited & auditable) across 24 core vulnerability classes · enterprise identity + infrastructure attack matrices · engagement-folder scaffolding · optional Burp MCP integration.
 
 Built by **[Sachin Sharma](https://www.linkedin.com/in/sachinsharma8080/)** — Bug Hunting & GenAI Security Research.
+
+This repository is the Codex-compatible distribution maintained at
+[`Hamoyeah/Codex-Bug-hunter`](https://github.com/Hamoyeah/Codex-Bug-hunter), based on the
+original [`elementalsouls/Claude-BugHunter`](https://github.com/elementalsouls/Claude-BugHunter).
+Original authorship, license, and upstream history are retained.
 
 <p align="center">
   <sub>SPONSORED BY</sub>
@@ -28,7 +33,7 @@ Built by **[Sachin Sharma](https://www.linkedin.com/in/sachinsharma8080/)** — 
 
 ## What is this?
 
-`claude-bughunter` is a drop-in skill bundle for the [Claude Code skills system](https://docs.claude.com/en/docs/claude-code/skills). Install once and Claude Code stops being a chatbot and starts behaving like a senior bug-hunting researcher or red-team operator: it knows the techniques, the chain templates, the VRT mappings, the platform CVE chains, and the hygiene — and it stays in scope.
+`claude-bughunter` is an Agent Skills bundle for **Claude Code and OpenAI Codex**. Install once and the agent gains the techniques, chain templates, VRT mappings, platform CVE chains, validation gates, and evidence hygiene needed for authorized work.
 
 Four layers stack:
 
@@ -43,20 +48,39 @@ All triggered automatically by topic — describe what you're testing in plain E
 
 ## Quickstart
 
+**Codex — dedicated install (recommended for Codex users):**
+
+```bash
+git clone https://github.com/Hamoyeah/Codex-Bug-hunter.git
+cd Codex-Bug-hunter
+bash scripts/install.sh --codex-only
+```
+
+```powershell
+# Windows PowerShell 5.1+; works even when .ps1 execution is restricted globally
+git clone https://github.com/Hamoyeah/Codex-Bug-hunter.git
+cd Codex-Bug-hunter
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexOnly
+```
+
+Start a new Codex thread so it refreshes the skill index, then invoke
+`$bughunter hunt <authorized-target>` or ask for a BugHunter recon/triage/report workflow.
+The Codex-only installer writes `~/.agents/skills` and does not modify `~/.claude` or your shell profile.
+
 **Option A — install as a Claude Code plugin (recommended).** From inside Claude Code:
 
 ```text
-/plugin marketplace add elementalsouls/Claude-BugHunter
-/plugin install claude-bughunter@elementalsouls
+/plugin marketplace add Hamoyeah/Codex-Bug-hunter
+/plugin install claude-bughunter@hamoyeah
 ```
 
-All 83 skills + 15 commands load namespaced under `claude-bughunter:` and update when you bump the plugin version — no files copied into `~/.claude/`.
+All 84 skills + 15 commands load namespaced under `claude-bughunter:` and update when you bump the plugin version — no files copied into `~/.claude/`.
 
 **Option B — copy install (no plugin system / pin to a clone):**
 
 ```bash
-git clone https://github.com/elementalsouls/Claude-BugHunter.git
-cd Claude-BugHunter
+git clone https://github.com/Hamoyeah/Codex-Bug-hunter.git
+cd Codex-Bug-hunter
 ```
 
 ```bash
@@ -71,13 +95,14 @@ Both copy the skills + commands into `~/.claude/` (macOS/Linux) or `%USERPROFILE
 
 **What each install path gives you:**
 
-| Path | 83 skills + 15 slash commands | `cbh` CLI | `hunt` scaffolder |
+| Path | 84 skills + workflows | `cbh` CLI | `hunt` scaffolder |
 |---|---|---|---|
-| **A — plugin** | ✅ namespaced under `claude-bughunter:` | ➕ separate `pipx install` | ❌ clone-only |
-| **B — copy install** | ✅ copied into `~/.claude/` | ✅ from the clone | ✅ from the clone |
+| **Codex-only copy** | ✅ `~/.agents/skills` + `bughunter` router | ✅ from the clone | ✅ from the clone |
+| **A — Claude plugin** | ✅ namespaced under `claude-bughunter:` | ➕ separate `pipx install` | ❌ clone-only |
+| **B — Claude copy** | ✅ copied into `~/.claude/` | ✅ from the clone | ✅ from the clone |
 
 The plugin is the fastest path to the skills + slash commands. The terminal-native
-`cbh` runner installs standalone — `pipx install git+https://github.com/elementalsouls/Claude-BugHunter`
+`cbh` runner installs standalone — `pipx install git+https://github.com/Hamoyeah/Codex-Bug-hunter`
 — so plugin users can add it without a full clone (see [`cbh` CLI](docs/cbh-cli.md)).
 The `hunt` engagement scaffolder ships with the clone (Option B).
 
@@ -119,31 +144,15 @@ pwsh ./scripts/install.ps1 -All -BurpMcp
 |---|---|---|
 | **Claude Code** (baseline) | `~/.claude/skills/` | *(default)* |
 | **OpenCode** | reads `~/.claude/skills/` & `~/.agents/skills/` | *(default)* / `--agents` |
-| **OpenAI Codex CLI** | `~/.agents/skills/` | `--agents` |
+| **OpenAI Codex CLI** | `~/.agents/skills/` | `--codex-only` / `-CodexOnly` |
 | **Hermes Agent** | `~/.hermes/skills/` | `--hermes` |
 | **Google AntiGravity** | `~/.gemini/config/skills/` | `--antigravity` |
 
-`--all` (`-All`) detects installed harnesses and copies skills to each harness's path (`~/.claude/skills`, `~/.agents/skills`, `~/.hermes/skills`, `~/.gemini/config/skills`); `--burp-mcp` (`-BurpMcp`) wires the Burp MCP server into each. The full *knowledge* layer ports to all five — the slash commands and `/hunt` engine stay Claude-Code-only by design.
+`--all` (`-All`) detects installed harnesses and copies skills to each harness's path (`~/.claude/skills`, `~/.agents/skills`, `~/.hermes/skills`, `~/.gemini/config/skills`); `--burp-mcp` (`-BurpMcp`) wires the Burp MCP server into each. Codex receives the `bughunter` router skill, which maps all 15 workflows to provider-neutral modes; Claude Code keeps the original slash commands.
 
 → [Multi-harness guide](docs/multi-harness.md)
 
 ---
-
-## Star History
-
-<a href="https://github.com/elementalsouls/Claude-BugHunter/stargazers">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="assets/star-history-dark.svg" />
-   <source media="(prefers-color-scheme: light)" srcset="assets/star-history-light.svg" />
-   <img alt="Star history chart for Claude-BugHunter" src="assets/star-history-light.svg" width="840" />
- </picture>
-</a>
-
-<sub>Chart is self-hosted — regenerate with `python3 scripts/gen_star_history.py` (needs `gh auth login`).
-Refreshes automatically each day via `.github/workflows/star-history.yml`.</sub>
-
----
-
 
 ## Scope — what this bundle is for, and what it isn't
 
@@ -173,7 +182,7 @@ If you're running an internal red team that includes domain-takeover chains via 
 
 ## What's inside
 
-**83 skills**, auto-loaded by topic — no invocation by name. Coverage across the external attack surface:
+**84 skills**, auto-loaded by topic — no invocation by name. Coverage across the external attack surface:
 
 | Category | # | Examples |
 |---|---|---|
@@ -182,6 +191,7 @@ If you're running an internal red team that includes domain-takeover chains via 
 | Reporting & validation | 6 | triage-validation, evidence-hygiene, report-writing, bugcrowd-reporting |
 | Recon & OSINT | 5 | web2-recon, offensive-osint, osint-methodology, recon-scope-triage |
 | Methodology & mindset | 4 | bb-methodology, bug-bounty, redteam-mindset, bb-local-toolkit |
+| Provider workflow routing | 1 | bughunter (Codex and Agent Skills clients) |
 
 Full searchable catalog → **[docs/skills.md](docs/skills.md)**. Also ships **15 slash commands** (`/hunt`, `/recon`, `/report`, …) and a deterministic **engagement engine** (`engine/`) that maps a target's attack surface and routes each finding to the skill that handles it.
 
@@ -192,7 +202,7 @@ Full searchable catalog → **[docs/skills.md](docs/skills.md)**. Also ships **1
 A 6-phase, non-linear workflow — **recon → map & rank → hunt → validate → report** — with scope enforced in code and a **7-Question Gate** before anything is submitted. Two ways to drive it:
 
 - **Plain English** — describe what you're testing and the relevant skill loads automatically.
-- **`/hunt` scaffold + `cbh` CLI** — engagement-folder structure, state, and orchestration.
+- **Claude slash commands / Codex `$bughunter` + `cbh` CLI** — engagement-folder structure, state, and orchestration.
 
 → [Usage guide & worked example](USAGE.md) · [6-phase architecture & skill-to-phase map](docs/architecture.md) · [`cbh` CLI](docs/cbh-cli.md)
 
@@ -320,7 +330,7 @@ Operational tradecraft accumulated across bug-bounty engagements and authorized 
 
 **Sister project:** [Claude-OSINT](https://github.com/elementalsouls/Claude-OSINT) — paired skills for the recon phase that this bundle picks up after. Its two recon skills (`offensive-osint`, `osint-methodology`) are **canonically maintained here** and re-exported there, so the two are byte-identical. **Installing both is safe:** each bundle's installer (`install.sh` on macOS/Linux, `install.ps1` on Windows) records a manifest, the script skips re-copying an identical skill, and `--uninstall` keeps any skill the other bundle still owns — uninstalling one never breaks the other.
 
-**Vendored foundation:** [shuvonsec/claude-bug-bounty](https://github.com/shuvonsec/claude-bug-bounty) — methodology, validation, reporting, payload library (8 of 83 skills + 15 slash commands)
+**Vendored foundation:** [shuvonsec/claude-bug-bounty](https://github.com/shuvonsec/claude-bug-bounty) — methodology, validation, reporting, payload library (8 of 84 skills + 15 slash commands)
 
 **Generator tool used (not vendored):** [shuvonsec/public-skills-builder](https://github.com/shuvonsec/public-skills-builder) — used to scaffold per-class skills from H1 disclosed reports
 

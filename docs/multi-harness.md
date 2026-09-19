@@ -6,9 +6,9 @@ description: Run the Claude-BugHunter skills on OpenCode, Codex, Hermes Agent, a
 
 # Multi-harness install
 
-The 83 skills are plain **Agent Skills** (`SKILL.md` = `name` + `description` frontmatter + Markdown). That format is an open standard, so the *knowledge* runs on more than Claude Code. This page shows how to install it on **OpenCode**, **OpenAI Codex CLI**, **Hermes Agent**, and **Google AntiGravity**.
+The 84 skills are plain **Agent Skills** (`SKILL.md` = `name` + `description` frontmatter + Markdown). This page shows how to install them on **OpenCode**, **OpenAI Codex CLI**, **Hermes Agent**, and **Google AntiGravity**.
 
-> **What ports and what doesn't.** The **83 skills** (payloads, methodology, bypass tables, disclosed-report patterns) port to every harness below. The **`/hunt` slash commands, the plugin marketplace, and the `hunt-dispatch` subagent routing are Claude-Code-specific** and do **not** port — other harnesses get the knowledge, not the orchestration engine. **Burp MCP** ports to all of them (it's just an MCP server).
+> **Codex workflow parity.** Claude's 15 slash commands remain available in Claude Code. Codex loads the `bughunter` router skill and exposes the same modes as `$bughunter hunt`, `$bughunter recon`, `$bughunter triage`, and so on. The deterministic engine also supports `--provider codex`. **Burp MCP** is optional and portable.
 
 ## Compatibility matrix (verified mid-2026)
 
@@ -16,7 +16,7 @@ The 83 skills are plain **Agent Skills** (`SKILL.md` = `name` + `description` fr
 |---|---|---|---|---|
 | **Claude Code** (baseline) | ✅ native | `~/.claude/skills/` | ✅ | ✅ (`/hunt`, …) |
 | **OpenCode** | ✅ native | reads `~/.claude/skills/` **and** `~/.agents/skills/` | ✅ `opencode.json` | ✅ own format |
-| **Codex CLI** | ✅ native | `~/.agents/skills/` (does *not* read `~/.claude/`) | ✅ `~/.codex/config.toml` | ✅ own format |
+| **Codex CLI** | ✅ native | `~/.agents/skills/` (does *not* read `~/.claude/`) | ✅ `~/.codex/config.toml` | ✅ `bughunter` router |
 | **Hermes Agent** | ✅ (agentskills.io) | `~/.hermes/skills/` | ✅ | ✅ own format |
 | **Google AntiGravity** | ✅ native | `~/.gemini/config/skills/` | ✅ `~/.gemini/config/mcp_config.json` | ✅ own format |
 
@@ -28,16 +28,18 @@ One command installs the skills to every harness's path (copy install; existing 
 
 ```bash
 # macOS / Linux
-git clone https://github.com/elementalsouls/Claude-BugHunter.git
-cd Claude-BugHunter
+git clone https://github.com/Hamoyeah/Codex-Bug-hunter.git
+cd Codex-Bug-hunter
 bash scripts/install.sh --all          # Claude + ~/.agents/skills (Codex/OpenCode) + ~/.hermes/skills + ~/.gemini/config/skills
+bash scripts/install.sh --codex-only   # Codex only; leaves Claude and shell startup files untouched
 ```
 
 ```powershell
 # Windows (PowerShell)
-git clone https://github.com/elementalsouls/Claude-BugHunter.git
-cd Claude-BugHunter
+git clone https://github.com/Hamoyeah/Codex-Bug-hunter.git
+cd Codex-Bug-hunter
 pwsh ./scripts/install.ps1 -All         # Claude + ~/.agents/skills (Codex/OpenCode) + ~/.hermes/skills + ~/.gemini/config/skills
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexOnly
 ```
 
 Pick specific harnesses instead:
@@ -45,7 +47,8 @@ Pick specific harnesses instead:
 ```bash
 # macOS / Linux
 bash scripts/install.sh                 # Claude Code only (default)
-bash scripts/install.sh --agents        # + Codex & OpenCode (~/.agents/skills)
+bash scripts/install.sh --codex-only    # Codex only (~/.agents/skills)
+bash scripts/install.sh --agents        # Claude + Codex & OpenCode
 bash scripts/install.sh --hermes        # + Hermes Agent (~/.hermes/skills)
 bash scripts/install.sh --antigravity   # + Google AntiGravity (~/.gemini/config/skills)
 ```
@@ -53,14 +56,15 @@ bash scripts/install.sh --antigravity   # + Google AntiGravity (~/.gemini/config
 ```powershell
 # Windows (PowerShell)
 pwsh ./scripts/install.ps1              # Claude Code only (default)
-pwsh ./scripts/install.ps1 -Agents      # + Codex & OpenCode (~/.agents/skills)
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexOnly
+pwsh ./scripts/install.ps1 -Agents      # Claude + Codex & OpenCode
 pwsh ./scripts/install.ps1 -Hermes      # + Hermes Agent (~/.hermes/skills)
 pwsh ./scripts/install.ps1 -AntiGravity # + Google AntiGravity (~/.gemini/config/skills)
 ```
 
 - **OpenCode** already reads `~/.claude/skills/`, so the plain installer (no flags) is enough for OpenCode — you don't need `--agents`/`-Agents` for it. That flag exists mainly for **Codex** (which reads only `~/.agents/skills/`).
-  - *Caveat (verified):* OpenCode reads **both** `~/.claude/skills/` and `~/.agents/skills/`. If both are populated (e.g. you ran `--all`/`-All` for Codex too), OpenCode logs harmless `duplicate skill name` warnings and loads one copy — all 83 skills still work. Only populate `~/.agents/skills/` if you actually use Codex.
-- **Codex is the strict parser** (verified by testing): it hard-rejects descriptions > 1024 chars and invalid YAML, where Claude/OpenCode/Hermes/AntiGravity are lenient. So the installer **auto-truncates** any description > 1024 to ≤1024 **only in the `~/.agents/skills` (Codex) copy** — your `~/.claude`, `~/.hermes`, and `~/.gemini/config/skills` copies keep the full descriptions (incl. non-English trigger words). The install logs which were truncated (today: the 3 aggregator router skills). `--normalize-frontmatter` (`-NormalizeFrontmatter`) additionally strips the non-standard `sources:`/`report_count:` keys (optional — Codex tolerates them).
+  - *Caveat:* OpenCode reads **both** `~/.claude/skills/` and `~/.agents/skills/`. If both are populated, it may log harmless duplicate-skill warnings and load one copy.
+- **Codex enforces Agent Skills metadata limits.** Source descriptions are kept within 1024 characters, and the installers validate/truncate the Codex copy as a final safeguard. `--normalize-frontmatter` (`-NormalizeFrontmatter`) can also strip legacy metadata keys.
 
 ## Burp MCP on other harnesses
 
@@ -93,6 +97,12 @@ Or do it manually (replace the jar path / port with yours):
 ```
 
 **Codex** — `~/.codex/config.toml`
+```bash
+codex mcp add burp -- java -jar ~/.BurpSuite/mcp-proxy/mcp-proxy-all.jar --sse-url http://127.0.0.1:9876
+codex mcp list
+```
+
+Equivalent configuration:
 ```toml
 [mcp_servers.burp]
 command = "java"
@@ -114,5 +124,6 @@ args = ["-jar", "~/.BurpSuite/mcp-proxy/mcp-proxy-all.jar", "--sse-url", "http:/
 **Hermes** — see the [Hermes MCP guide](https://hermes-agent.nousresearch.com/docs/guides/use-mcp-with-hermes); use the same `java -jar … --sse-url …` command.
 
 ## Verify it loaded
-- **OpenCode / Codex / Hermes / Google AntiGravity:** open the tool and describe a task (e.g. *"test this endpoint for SSRF"*) — the matching `hunt-*` skill should auto-load by its description, same as in Claude Code.
+- **Codex:** start a new thread and invoke `$bughunter recon <authorized-target>` or select the `bughunter` skill. A direct task such as *"test this authorized endpoint for SSRF"* may also auto-load `hunt-ssrf`.
+- **OpenCode / Hermes / Google AntiGravity:** open the tool and describe a task; the matching skill should auto-load by description.
 - **Hermes:** `hermes skills` should list the bundle from `~/.hermes/skills/`.

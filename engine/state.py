@@ -31,18 +31,20 @@ class Engagement:
 
     def _load(self):
         if os.path.isfile(self.state_path):
-            return json.load(open(self.state_path))
+            with open(self.state_path, encoding="utf-8") as handle:
+                return json.load(handle)
         return {"name": self.name, "created": _now(), "phase": "init",
                 "targets": [], "surface": [], "tested": [], "candidates": [], "confirmed": []}
 
     def save(self):
         tmp = self.state_path + ".tmp"
-        json.dump(self.state, open(tmp, "w"), indent=2)
+        with open(tmp, "w", encoding="utf-8") as handle:
+            json.dump(self.state, handle, indent=2, ensure_ascii=False)
         os.replace(tmp, self.state_path)
 
     def log(self, msg):
         line = f"{_now()}  {msg}"
-        with open(self.log_path, "a") as f:
+        with open(self.log_path, "a", encoding="utf-8") as f:
             f.write(line + "\n")
         print("  " + msg, flush=True)
 

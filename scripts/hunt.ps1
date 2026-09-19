@@ -3,7 +3,7 @@
 #
 # Native Windows port of scripts/hunt.sh. No WSL, no bash required.
 # Adds a `hunt` function that creates a per-target working folder under
-# $HOME\Targets\ with CLAUDE.md, scope.md, submissions tracker, findings
+# $HOME\Targets\ with AGENTS.md, CLAUDE.md compatibility copy, scope.md, submissions tracker, findings
 # folder, evidence folder (gitignored), and notes scratchpad.
 #
 # Usage:
@@ -59,12 +59,12 @@ function hunt {
 
     $today = (Get-Date).ToUniversalTime().ToString('yyyy-MM-dd')
 
-    # ============== CLAUDE.md ==============
+    # ============== AGENTS.md + CLAUDE.md compatibility copy ==============
     $claudeBody = @'
 **Platform:** [TBD — Bugcrowd / HackerOne / Intigriti / Immunefi / private]
 **Program URL:** [paste the program page URL here]
 
-## Quick context for Claude
+## Quick context for the coding agent
 
 This folder is the working directory for a single bug-bounty engagement.
 Files in this folder:
@@ -86,7 +86,7 @@ Files in this folder:
 3. **Hunt** — `web2-vuln-classes` (or per-class `hunt-*` skills if installed)
    plus `security-arsenal` for payloads.
 
-4. **Validate** — run `/triage` on every lead BEFORE drafting a report.
+4. **Validate** — run the `bughunter triage` workflow on every lead BEFORE drafting a report.
    Apply the 7-Question Gate from `triage-validation`.
 
 5. **Capture evidence** — `evidence-hygiene` BEFORE any screenshot.
@@ -106,22 +106,23 @@ Files in this folder:
 - Test-account email: `<your-bugcrowdninja-alias>@bugcrowdninja.com`
 - Burp proxy capturing through all browser sessions for this target.
 
-## Useful commands during the engagement
+## Useful BugHunter modes during the engagement
 
-- `/scope <asset>` — verify a specific asset is in scope
-- `/triage` — quick 7-Question Gate on a finding
-- `/validate` — full 4-gate finding validator
-- `/report` — draft a submission-ready report
-- `/remember` — log a finding to hunt memory
+- `bughunter scope <asset>` — verify a specific asset is in scope
+- `bughunter triage` — quick 7-Question Gate on a finding
+- `bughunter validate` — full 4-gate finding validator
+- `bughunter report` — draft a submission-ready report
+- `bughunter remember` — log a finding to hunt memory
 '@
-    $claudeMd = "# Engagement: $Target`r`n`r`n**Target:** $Target`r`n**Started:** $today`r`n" + $claudeBody
-    Write-HuntFile (Join-Path $dir 'CLAUDE.md') $claudeMd
+    $agentMd = "# Engagement: $Target`r`n`r`n**Target:** $Target`r`n**Started:** $today`r`n" + $claudeBody
+    Write-HuntFile (Join-Path $dir 'AGENTS.md') $agentMd
+    Write-HuntFile (Join-Path $dir 'CLAUDE.md') $agentMd
 
     # ============== scope.md ==============
     $scopeBody = @'
 
 > Parse this from the program page (Bugcrowd / HackerOne / etc.) before
-> doing any active testing. `/scope <asset>` can verify individual assets.
+> doing any active testing. `bughunter scope <asset>` can verify individual assets.
 
 ## In scope
 
@@ -176,7 +177,7 @@ Files in this folder:
 # Format (tab-separated):
 # <UUID>  <severity>  <VRT-or-class>  <one-line title>
 #
-# Use `/remember` after each submission to append the new ID and link
+# Use `bughunter remember` after each submission to append the new ID and link
 # back to chained primitives.
 
 '@
@@ -299,11 +300,12 @@ print(f"  ✓ Ingested recon manifest: {len(hosts)} live hosts -> scope.md, {len
     }
 
     # ============== confirmation ==============
-    Write-Host "Initialized $dir with CLAUDE.md and engagement template."
+    Write-Host "Initialized $dir with AGENTS.md, CLAUDE.md, and the engagement template."
     Write-Host "cd $dir to start hacking."
     Write-Host ""
     Write-Host "Files created:"
-    Write-Host "  CLAUDE.md           - Claude Code engagement context"
+    Write-Host "  AGENTS.md           - Codex and Agent Skills engagement context"
+    Write-Host "  CLAUDE.md           - Claude Code compatibility copy"
     Write-Host "  scope.md            - parsed scope template (fill from program page)"
     Write-Host "  submissions.txt     - submission UUID tracker"
     Write-Host "  findings/README.md  - findings folder convention"

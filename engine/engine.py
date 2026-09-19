@@ -12,7 +12,7 @@ in-scope hosts, and no hunt agent is ever dispatched at an out-of-scope target.
 State is persisted after every step, so a run is auditable and resumable.
 
   python3 engine/engine.py --scope engine/engagement.example.json --mock        # dry-run the flow (no agents)
-  python3 engine/engine.py --scope my-engagement.json --max-hunts 8             # live (needs Burp + claude budget)
+  python3 engine/engine.py --scope my-engagement.json --provider codex --max-hunts 8  # live with Codex
   python3 engine/engine.py --scope my-engagement.json --phases hunt,validate,report   # resume later phases
 """
 import argparse
@@ -49,18 +49,18 @@ DEFAULT_PHASES = ["recon", "rank", "map"]
 
 
 class Engine:
-    def __init__(self, scope_path, base, model, max_hunts, max_turns, timeout, mock=False,
+    def __init__(self, scope_path, base, provider, model, max_hunts, max_turns, timeout, mock=False,
                  allow_intrusive=False, parallel=3, expand=False, use_memory=False):
         self.scope = Scope.load(scope_path)
         self.eng = Engagement(base, self.scope.name)
-        self.model, self.max_hunts = model, max_hunts
+        self.provider, self.model, self.max_hunts = provider, model, max_hunts
         self.max_turns, self.timeout, self.mock = max_turns, timeout, mock
         self.allow_intrusive = allow_intrusive
         self.expand = expand
         self.parallel = max(1, parallel)
         self.use_memory = use_memory
         self.eng.log(f"engine start | scope={self.scope.name} in={self.scope.in_scope} "
-                     f"out={self.scope.out_of_scope} seeds={self.scope.seeds} mock={mock} "
+                     f"out={self.scope.out_of_scope} seeds={self.scope.seeds} mock={mock} provider={provider} "
                      f"intrusive={'ALLOWED' if allow_intrusive else 'READ-ONLY (default)'}")
 
     # ---------------- rules of engagement (injected into every agent) ----------------
@@ -207,7 +207,8 @@ class Engine:
                              f"`{SM.probe_for(c, url, param)}`")
             lines.append("")
         path = os.path.join(self.eng.dir, "arsenal.md")
-        open(path, "w").write("\n".join(lines))
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write("\n".join(lines))
         self.eng.log(f"map: wrote arsenal map -> {path}  ← focus your 20% here (or run --hunt to auto-test)")
 
     # ---------------- parallel runner ----------------
@@ -258,7 +259,7 @@ class Engine:
         self.eng.log(f"hunt: testing {len(todo)} item(s), {self.parallel} at a time")
         for it, f in self._run_parallel(self._hunt_agent, todo):
             if f and f.get("rate_limited"):
-                self.eng.log("hunt: ⚠ claude usage limit hit — remaining results may be partial")
+                self.eng.log("hunt: ⚠ agent usage limit hit — remaining results may be partial")
             if (not f) or f.get("errored"):
                 # Not actually tested (agent hard error / worker exception): do NOT mark
                 # tested, so the item stays on the worklist and is retried on the next run.
@@ -298,7 +299,8 @@ class Engine:
                 f'{{"vulnerable":true|false,"severity":"low|medium|high|critical","evidence":"<what proves it>",'
                 f'"request":"<the winning request>","hosts_contacted":["every host you sent a request to"],'
                 f'"proof_note":"<empty, or why proof was limited by scope/read-only>"}}.')
-        r = A.run_agent(task, model=self.model, max_turns=self.max_turns, timeout=self.timeout)
+        r = A.run_agent(task, provider=self.provider, model=self.model,
+                        max_turns=self.max_turns, timeout=self.timeout, cwd=self.eng.dir)
         if r.get("error"):
             self.eng.log(f"hunt agent error ({it['url']}): {r['error']}")
             # Hard error (timeout / rate-limit / parse / missing CLI): the item was NOT
@@ -346,7 +348,8 @@ class Engine:
                 f"the severity. Is it a REAL, exploitable vulnerability or a false positive? "
                 f"End with a fenced ```json``` object: "
                 f'{{"real":true|false,"severity":"low|medium|high|critical","reason":"<why, incl. any scope/intrusive caveat>"}}.')
-        r = A.run_agent(task, model=self.model, max_turns=self.max_turns, timeout=self.timeout)
+        r = A.run_agent(task, provider=self.provider, model=self.model,
+                        max_turns=self.max_turns, timeout=self.timeout, cwd=self.eng.dir)
         if r.get("error"):
             self.eng.log(f"validate agent error: {r['error']}")
             return {"real": False, "reason": f"verify error: {r['error']}"}
@@ -380,7 +383,8 @@ class Engine:
                       f"- **Verifier:** {f.get('verdict',{}).get('reason','')}", ""]
             lines += block
         path = os.path.join(self.eng.dir, "report.md")
-        open(path, "w").write("\n".join(lines))
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write("\n".join(lines))
         self.eng.log(f"report: wrote {len(c)} confirmed finding(s) -> {path}")
         try:
             memory.record_run(self.scope.name, self._tech(), self.eng.state["tested"], self.eng.state["confirmed"])
@@ -417,6 +421,9 @@ MOCK_VALIDATE = {
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser()
     ap.add_argument("--scope", required=True, help="engagement/scope JSON (name, in_scope, out_of_scope, seeds)")
     ap.add_argument("--base", default="~/.bughunter-engagements")
@@ -424,7 +431,10 @@ def main():
                     help="explicit phase list; default is recon,rank,map (add --hunt to test)")
     ap.add_argument("--hunt", action="store_true",
                     help="OPT-IN: after mapping, auto-test with agents (recon,rank,map,hunt,validate,report)")
-    ap.add_argument("--model", default="claude-sonnet-4-6")
+    ap.add_argument("--provider", choices=["auto", "claude", "codex"], default="auto",
+                    help="headless agent provider (auto preserves Claude-first compatibility)")
+    ap.add_argument("--model", default=None,
+                    help="provider-specific model override; omit to use that CLI's configured default")
     ap.add_argument("--max-hunts", type=int, default=10)
     ap.add_argument("--max-turns", type=int, default=40)
     ap.add_argument("--timeout", type=int, default=600)
@@ -445,7 +455,7 @@ def main():
         phases = ALL_PHASES                       # full: map then auto-test
     else:
         phases = DEFAULT_PHASES                   # default: recon -> rank -> map, then STOP for the operator
-    eng = Engine(a.scope, a.base, a.model, a.max_hunts, a.max_turns, a.timeout, a.mock,
+    eng = Engine(a.scope, a.base, a.provider, a.model, a.max_hunts, a.max_turns, a.timeout, a.mock,
                  a.allow_intrusive, a.parallel, a.expand, a.use_memory)
     eng.run(phases)
     print("\n" + json.dumps(eng.eng.summary(), indent=2))

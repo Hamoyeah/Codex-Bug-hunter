@@ -3,7 +3,7 @@
 check_doc_counts.py — verify skill/command counts in docs match what's on disk.
 
 The bundle's skill/command counts have grown several times (skills: 51 -> 71 ->
-82; hunt-* skills: 24 -> 48 -> 57) and each time, at least one doc's hardcoded
+82 -> 84; hunt-* skills: 24 -> 48 -> 58) and each time, at least one doc's hardcoded
 number didn't get updated along with the rest (see the 71/48/24 stale-count
 fixes). This script computes the real counts from skills/ and commands/ on
 disk, then checks every doc location that asserts one of those numbers in
@@ -56,19 +56,19 @@ def read(path):
 # (file, regex with one capture group per checked number, key or tuple of keys
 # into the `actual` dict, human label for error messages)
 CHECKS = [
-    ("README.md", r"\*\*(\d+) skills\*\* · 15 slash commands", "total", "hero line skill count"),
-    ("README.md", r"skills\*\* · (\d+) slash commands ·", "commands", "hero line command count"),
-    ("README.md", r"\| (\d+) skills \+ (\d+) slash commands \|", ("total", "commands"), "install-path comparison table"),
+    ("README.md", r"\*\*(\d+) skills\*\* · 15 Claude slash commands", "total", "hero line skill count"),
+    ("README.md", r"skills\*\* · (\d+) Claude slash commands", "commands", "hero line command count"),
+    ("README.md", r"\| Path \| (\d+) skills \+ workflows \|", "total", "install-path comparison table"),
     ("README.md", r"\*\*(\d+) skills\*\*, auto-loaded", "total", "'What's inside' intro"),
     ("README.md", r"(\d+) `hunt-\*` skills curated from", "hunt", "'Hunt webapps' bullet"),
     ("README.md", r"Also ships \*\*(\d+) slash commands\*\*", "commands", "documentation table footer"),
     ("README.md", r"\(8 of (\d+) skills \+ (\d+) slash commands\)", ("total", "commands"), "vendored-foundation credit"),
     ("SECURITY.md", r"installing (\d+) `SKILL\.md` files", "total", "supply-chain-trust intro"),
     ("USAGE.md", r"the (\d+)-skill Claude-BugHunter bundle", "total", "doc intro"),
-    ("USAGE.md", r"copies (\d+) skills \+ (\d+) commands into Claude Code", ("total", "commands"), "quickstart code block"),
+    ("USAGE.md", r"copies (\d+) skills into ~/\.agents/skills", "total", "Codex quickstart code block"),
     ("USAGE.md", r"(\d+) `hunt-\*` skills \+ \d+ enterprise-platform skills", "hunt", "phase-3 architecture table row"),
     ("USAGE.md", r"### Hunt — (\d+) per-class web skills", "hunt", "skill-inventory section header"),
-    ("USAGE.md", r"installs all (\d+) skills, (\d+) commands", ("total", "commands"), "setup-for-someone-new summary"),
+    ("USAGE.md", r"installs all (\d+) skills and the provider-appropriate", "total", "setup-for-someone-new summary"),
     ("INSTALL.md", r"All (\d+) skills →", "total", "what-gets-installed list"),
     ("docs/skills.md", r"All \*\*(\d+) skills\*\* in the bundle", "total", "catalog intro"),
     ("docs/skills.md", r"## Hunt — web app vuln classes \((\d+)\)", "hunt", "catalog Hunt section header"),

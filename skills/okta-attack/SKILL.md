@@ -1,8 +1,6 @@
 ---
 name: okta-attack
-description: Okta-as-IdP red-team attack chain — tenant discovery, user enumeration (multiple vectors), authentication flow analysis (factors enumeration, push-notification fatigue, SMS bypass), password spray with lockout discipline, Okta-specific phishing primitives (kits, FastPass abuse, OIDC redirect_uri tampering), MFA enumeration, post-compromise admin API surface. Many enterprise orgs use Okta instead of (or alongside) Entra ID. Distinct endpoints, distinct rate-limiting, distinct factor flows. Use when recon shows `<tenant>.okta.com`, `<tenant>.okta-emea.com`, `<tenant>.oktapreview.com`, or autodiscover-style records pointing at Okta IdP.
-sources: public-okta-docs, idp-redteam-knowledge, disclosed-incidents
-report_count: 8
+description: Okta-as-IdP authorized red-team methodology covering tenant discovery, user and factor enumeration, authentication-flow analysis, lockout-aware password testing, push and SMS weaknesses, FastPass, OIDC redirect handling, MFA, and post-compromise admin APIs. Use when recon identifies an Okta, Okta EMEA, or Okta Preview tenant or IdP records.
 ---
 
 ## When to use this skill

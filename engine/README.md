@@ -31,10 +31,10 @@ automation points. It does **not** try to test everything itself; active hunting
 |---|---|
 | `scope.py` | deterministic allowlist (apex/wildcard/CIDR/regex; deny-wins; default-deny). Enforced at recon **and** hunt. |
 | `recon.py` | **deterministic recon** — per target: service/tech (JS markers), JS-bundle endpoint mining, **JS secret scanning** (AWS/GCP/Anthropic/OpenAI/Slack/GitHub/Stripe/EmailJS… keys, redacted), and **all input parameters** from two independent sources — `gau` (passive historical) + `katana` (active live crawl). Noise-filtered, scope-filtered, multi-class categorized. No LLM in the find-step. |
-| `skill_map.py` | **arsenal categorization** — maps each `(endpoint\|param, class)` → the specific `hunt-*` skill(s) **actually installed** in `~/.claude/skills`, plus a curl-first starter probe. Tech-stack skills (`hunt-nextjs`, `hunt-nodejs`…) mapped from the fingerprint. |
+| `skill_map.py` | **arsenal categorization** — maps each `(endpoint\|param, class)` → the specific installed `hunt-*` skill(s), resolving the repo, `~/.agents/skills`, then `~/.claude/skills`, plus a curl-first starter probe. |
 | `osint.py` | **separate/optional** — per-target service/tech probe (PD `httpx-toolkit`) reused by recon. Its subdomain-enum path is *not* in the engine flow (that's Claude-OSINT). |
 | `state.py` | persistent, resumable engagement store (`state.json` + `evidence/` + `engine.log` + `arsenal.md` + `report.md`). |
-| `agent.py` | headless `claude -p` dispatch + JSON extraction. **Skills OFF by default** (eval: ~0 capability gain, saves ~12–15k tokens/agent). Used only for the opt-in hunt/validate. |
+| `agent.py` | provider-neutral headless dispatch for Claude Code or `codex exec`, plus JSON extraction. Used only for opt-in hunt/validate. |
 | `engine.py` | the orchestrator: phases, scope enforcement, ranking, the map, parallel hunt/validate, candidate→confirm, report. |
 
 ## The map (the default deliverable)
@@ -53,6 +53,7 @@ python3 engine/engine.py --scope my-engagement.json
 # OPT-IN — auto-test the mapped surface with agents (read-only, curl-first, parallel):
 cp engine/burp-mcp.json.example engine/burp-mcp.json   # only if you want Burp for OOB/blind
 python3 engine/engine.py --scope my-engagement.json --hunt --parallel 3 --max-hunts 12
+python3 engine/engine.py --scope my-engagement.json --provider codex --hunt --parallel 3
 python3 engine/engine.py --scope my-engagement.json --hunt --allow-intrusive   # permit state-changing PoCs (off by default)
 
 # dry-run the whole wiring with canned output (no agents, no budget):
@@ -61,7 +62,7 @@ python3 engine/engine.py --scope engine/engagement.example.json --base /tmp/eng 
 # standalone recon (deterministic, no engine state):
 python3 engine/recon.py https://target/ target.com
 ```
-Key flags: `--hunt` (opt into agents) · `--allow-intrusive` (default OFF = read-only) ·
+Key flags: `--provider auto|claude|codex` · `--model <provider-model>` · `--hunt` (opt into agents) · `--allow-intrusive` (default OFF = read-only) ·
 `--parallel N` (concurrent agents, default 3) · `--phases a,b,c` (explicit override).
 
 ## Safety

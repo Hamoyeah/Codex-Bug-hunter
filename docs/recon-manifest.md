@@ -37,7 +37,7 @@ A producer that doesn't discover a section leaves it empty (`[]` / `{}`) — nev
 | `schema_version` | string | `"1.0"` |
 | `target` | string | root domain |
 | `generated_at` | string | UTC ISO-8601 |
-| `producers` | string[] | e.g. `["cbh-recon/2.1.0"]` |
+| `producers` | string[] | e.g. `["cbh-recon/2.2.0"]` |
 | `counts` | object | `{subdomains, resolved, live}` |
 | `assets` | object[] | `{host, ips[], url, status, server, title, tech[], source}` (`url`/`status` null for DNS-only) |
 | `ranked_surface` | object[] | `{url, host, bug_classes[], priority, rationale}` · priority ∈ `P1`/`P2`/`KILL` |
@@ -51,7 +51,7 @@ A producer that doesn't discover a section leaves it empty (`[]` / `{}`) — nev
   "schema_version": "1.0",
   "target": "acme.com",
   "generated_at": "2026-06-25T12:00:00+00:00",
-  "producers": ["cbh-recon/2.1.0"],
+  "producers": ["cbh-recon/2.2.0"],
   "counts": { "subdomains": 47, "resolved": 31, "live": 12 },
   "assets": [
     { "host": "api.acme.com", "ips": ["1.2.3.4"], "url": "https://api.acme.com",

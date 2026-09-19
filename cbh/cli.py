@@ -35,6 +35,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import socket
 import subprocess
 import sys
@@ -52,7 +53,7 @@ REPORTS_DIR = REPO_ROOT / "docs" / "disclosed-reports"
 # Clone mode = the live repo is present (skills/ on disk). Otherwise we're
 # pip-installed and fall back to the bundled cbh/data/skill_index.json.
 CLONE_MODE = SKILLS_DIR.is_dir() and any(SKILLS_DIR.iterdir()) if SKILLS_DIR.exists() else False
-REPO_URL = "https://github.com/elementalsouls/Claude-BugHunter"
+REPO_URL = "https://github.com/Hamoyeah/Codex-Bug-hunter"
 
 _BUNDLED_INDEX: dict | None = None
 
@@ -94,7 +95,7 @@ def section(title: str):
 
 
 def has_cmd(name: str) -> bool:
-    return subprocess.call(["which", name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+    return shutil.which(name) is not None
 
 
 def run_cmd(cmd: list[str], timeout: int = 30) -> tuple[int, str, str]:
@@ -304,7 +305,7 @@ def cmd_recon(args: argparse.Namespace) -> int:
     if not subs:
         subs.add(target)
     subs.add(target)
-    (out_dir / "subdomains.txt").write_text("\n".join(sorted(subs)) + "\n")
+    (out_dir / "subdomains.txt").write_text("\n".join(sorted(subs)) + "\n", encoding="utf-8")
     say(f"  Total unique: {color(str(len(subs)), 'bold')}")
 
     # Step 2 — DNS resolution
@@ -316,7 +317,8 @@ def cmd_recon(args: argparse.Namespace) -> int:
         if ips:
             resolved[s] = ips
     (out_dir / "resolved.txt").write_text(
-        "\n".join(f"{h}|{','.join(ips)}" for h, ips in sorted(resolved.items())) + "\n"
+        "\n".join(f"{h}|{','.join(ips)}" for h, ips in sorted(resolved.items())) + "\n",
+        encoding="utf-8",
     )
     say(f"  Resolved: {color(str(len(resolved)), 'bold')} / {len(subs)}")
 
@@ -333,7 +335,7 @@ def cmd_recon(args: argparse.Namespace) -> int:
             if rec:
                 rec["host"] = host
                 live.append(rec)
-    (out_dir / "live-hosts.json").write_text(json.dumps(live, indent=2))
+    (out_dir / "live-hosts.json").write_text(json.dumps(live, indent=2), encoding="utf-8")
     say(f"  HTTP-live: {color(str(len(live)), 'bold')} / {len(resolved)}")
 
     # Step 4 — summary report
@@ -346,7 +348,7 @@ def cmd_recon(args: argparse.Namespace) -> int:
     # recon→hunt handoff contract — see docs/recon-manifest.md
     manifest = build_manifest(target, subs, resolved, live)
     manifest_path = out_dir / "manifest.json"
-    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     say(f"  {manifest_path}  {color('(recon→hunt manifest)', 'dim')}")
 
     section("SUMMARY")
@@ -356,7 +358,7 @@ def cmd_recon(args: argparse.Namespace) -> int:
     say(f"  HTTP-live:         {len(live)}")
     say(f"  Output:            {out_dir}")
     say()
-    say(f"  Next: {color('cbh classify <url>', 'bold')} for fast pattern-match, or {color('/hunt <target>', 'bold')} in Claude Code for full LLM-driven hunting")
+    say(f"  Next: {color('cbh classify <url>', 'bold')} for fast pattern-match, or use {color('bughunter hunt <target>', 'bold')} for full LLM-driven hunting")
     return 0
 
 
@@ -388,13 +390,13 @@ def write_recon_summary(target: str, subs: set[str], resolved: dict, live: list,
         "- For `mta-sts.*` / `*.github.io` hosts, fingerprint against `hunt-subdomain` takeover table.",
         "",
     ]
-    out.write_text("\n".join(lines))
+    out.write_text("\n".join(lines), encoding="utf-8")
 
 
 # ============================================================
 # recon→hunt manifest (the integration handoff contract)
 # ============================================================
-PRODUCER = "cbh-recon/2.1.0"
+PRODUCER = "cbh-recon/2.2.0"
 
 # subdomain keywords → triage priority + rationale for ranked_surface
 _P1_HINTS = ("api.", "api-", "graphql", "auth.", "sso.", "login.", "account.",
@@ -586,9 +588,9 @@ def cmd_classify(args: argparse.Namespace) -> int:
     say(f"  3. Apply OOB-Or-It-Didn't-Happen Gate before claiming success")
     say(f"  4. {color('cbh triage <finding.md>', 'bold')} once you have a candidate finding")
     say()
-    say(color("Need richer context? In a Claude Code conversation:", "dim"))
-    say(color(f"   /hunt <url>     — full hunt-dispatch routing with LLM judgment", "dim"))
-    say(color(f"   /chain          — build A→B→C exploit chains", "dim"))
+    say(color("Need richer context? In an agent conversation:", "dim"))
+    say(color(f"   bughunter hunt <url>  — full hunt-dispatch routing with LLM judgment", "dim"))
+    say(color(f"   bughunter chain       — build A→B→C exploit chains", "dim"))
     return 0
 
 
@@ -807,7 +809,7 @@ def cmd_report(args: argparse.Namespace) -> int:
         # Ancestry check, not str.startswith (which a `<cwd>-evil` sibling bypasses).
         if cwd not in out_path.parents:
             print("[error] --out path must be within cwd", file=sys.stderr); return 1
-        out_path.write_text(draft)
+        out_path.write_text(draft, encoding="utf-8")
         section(f"report — {args.platform}")
         say(f"  Draft written: {color(str(out_path), 'bold')}")
         say()
@@ -867,7 +869,7 @@ def cmd_surface(args: argparse.Namespace) -> int:
     if idf:
         say(color(f"  identity fabric: {', '.join(idf.keys())}", "cyan"))
     say()
-    say(f"  Next: {color('/hunt ' + target, 'bold')} in Claude Code, "
+    say(f"  Next: {color('bughunter hunt ' + target, 'bold')} in Claude Code or Codex, "
         f"or {color('cbh classify <url>', 'bold')} for a single URL")
     return 0
 
@@ -876,12 +878,14 @@ def cmd_surface(args: argparse.Namespace) -> int:
 # Main dispatcher
 # ============================================================
 def main() -> int:
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(
         prog="cbh",
         description=("claude-bughunter CLI — terminal-native deterministic runner.\n"
-                     "SECONDARY interface; slash commands (/hunt, /recon, /triage, /report) "
-                     "in Claude Code are PRIMARY. Use cbh for CI/CD, scripted runs, "
-                     "deterministic verification, or when not in a Claude Code session."),
+                     "Use the provider-neutral bughunter skill for LLM-guided workflows. "
+                     "Use cbh for CI/CD, scripted runs, and deterministic verification."),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent("""\
             Examples:
@@ -891,8 +895,8 @@ def main() -> int:
               cbh triage findings/idor-2026-05-15.md
               cbh report findings/idor-2026-05-15.md --platform bugcrowd --out draft.md
 
-            For LLM-driven hunting with full skill context, use the slash commands
-            inside Claude Code: /hunt /recon /triage /report /validate /chain /autopilot
+            For LLM-driven hunting with full skill context, invoke the bughunter skill
+            in Claude Code or Codex: hunt, recon, triage, report, validate, chain, autopilot.
             See docs/cbh-cli.md for the "when to use which" matrix.
             """),
     )
