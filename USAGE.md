@@ -1,6 +1,6 @@
-# Claude-BugHunter — Usage Guide
+# Codex-Bug-hunter — Usage Guide
 
-A practical guide to using the 84-skill Claude-BugHunter bundle in Claude Code or OpenAI Codex for authorized bug hunting and external red-team engagements.
+A practical guide to using the 84-skill Codex-Bug-hunter bundle in OpenAI Codex for authorized bug hunting and external red-team engagements. Claude Code remains available as an optional compatibility runtime.
 
 > **Codex users:** install with `bash scripts/install.sh --codex-only`, or on Windows
 > `powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexOnly`. Start a new
@@ -17,7 +17,7 @@ This section is for people who have **never used the bundle before, never used C
 
 ### What is this bundle, in plain English?
 
-It's a collection of 84 markdown files (called **skills**) that turn OpenAI Codex or Claude Code into a methodical bug-hunting assistant.
+It's a collection of 84 Agent Skills that give Codex a methodical, scope-aware bug-hunting workflow.
 
 Without the bundle, asking an agent *"is this XSS?"* gets you a generic answer. With the bundle installed, the same question loads the `hunt-xss` skill — which contains specific detection patterns from 681+ disclosed reports, the exact payloads that have worked, and a validation gate that prevents you from filing a false-positive bug report.
 
@@ -98,21 +98,21 @@ Three good first targets:
 hunt juiceshop-practice
 cd ~/Targets/juiceshop-practice
 
-# Open Claude Code in this folder
-claude
+# Open Codex in this folder
+codex
 ```
 
-Claude Code opens. You'll see a prompt waiting for you to type. Copy-paste this:
+Codex opens. You'll see a prompt waiting for you to type. Copy-paste this:
 
 > *I'm practicing on OWASP Juice Shop running at https://juice-shop.herokuapp.com. This is a deliberately vulnerable training app, no authorization concerns. Walk me through finding my first bug — start with how to do recon on this target.*
 
 **What happens next:**
-- Claude reads your `CLAUDE.md` (the engagement context file `hunt` created)
-- Claude triggers `bb-methodology` (the 6-phase workflow) and walks you through Phase 1 (Scope)
-- Claude asks: *"Is this practice / training mode? (No real submissions, just learning.)"* — say **yes**
-- Claude triggers `web2-recon` or `offensive-osint` and gives you concrete commands to run
+- Codex reads `AGENTS.md` and the selected BugHunter workflow.
+- Codex triggers `bb-methodology` and walks you through Phase 1 (Scope).
+- Codex asks whether this is practice mode; answer **yes** for a training target.
+- Codex loads `web2-recon` or `offensive-osint` and proposes concrete commands.
 
-**You follow along.** Each time Claude gives you a command, paste it in another terminal tab and run it. Tell Claude what came back. Claude will spot vulnerable patterns and trigger the matching `hunt-*` skill.
+**You follow along.** Review each proposed command before running it. Codex will interpret the results and load the matching `hunt-*` skill.
 
 For example, when you find Juice Shop's `/api/users` endpoint with an `id` parameter, Claude loads `hunt-idor` and walks you through testing for Insecure Direct Object Reference.
 

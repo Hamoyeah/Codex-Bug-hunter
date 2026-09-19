@@ -1,14 +1,14 @@
 ---
 title: Home
 nav_order: 1
-description: An Agent Skills bundle for bug hunting and external red-team work in Claude Code and Codex.
+description: A Codex-first Agent Skills bundle for authorized bug hunting and external red-team work.
 permalink: /
 ---
 
 # Codex-Bug-hunter
 {: .fs-9 }
 
-A provider-neutral Agent Skills bundle for Claude Code and OpenAI Codex that supplies
+A Codex-first Agent Skills bundle that supplies
 bug-hunting techniques, chain templates, VRT mappings, platform CVE chains, validation
 gates, and evidence hygiene.
 {: .fs-6 .fw-300 }
@@ -55,7 +55,7 @@ cd Codex-Bug-hunter
 pwsh ./scripts/install.ps1
 ```
 
-Then open Codex or Claude Code and describe what you're testing in plain English —
+Then open Codex and describe what you're testing in plain English —
 the relevant skill loads automatically. In Codex, `$bughunter hunt <target>` selects
 the complete hunt workflow explicitly:
 

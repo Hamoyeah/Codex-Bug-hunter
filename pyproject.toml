@@ -3,14 +3,14 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "claude-bughunter"
+name = "codex-bug-hunter"
 version = "2.2.0"
-description = "cbh — provider-neutral recon/classify/triage/report runner for the Claude-BugHunter skill bundle"
+description = "Codex-first recon, classification, triage, and reporting runner for Codex-Bug-hunter"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [{ name = "Sachin Sharma" }]
-keywords = ["security", "bug-bounty", "recon", "claude", "codex", "pentest"]
+keywords = ["security", "bug-bounty", "recon", "codex", "agent-skills", "pentest"]
 dependencies = []
 
 [project.optional-dependencies]

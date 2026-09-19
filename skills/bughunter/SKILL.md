@@ -1,6 +1,6 @@
 ---
 name: bughunter
-description: Route authorized bug-bounty, WAPT, and external red-team work through Claude-BugHunter workflows in Codex or another Agent Skills client. Use for hunt, autopilot, recon, scope, surface ranking, triage, validation, reporting, chaining, intelligence, token scanning, Web3 audit, and hunt-memory operations.
+description: Route authorized bug-bounty, WAPT, and external red-team work through Codex-Bug-hunter workflows. Use for hunt, autopilot, recon, scope, surface ranking, triage, validation, reporting, chaining, intelligence, token scanning, Web3 audit, and hunt-memory operations in Codex or another Agent Skills client.
 ---
 
 # BugHunter workflow router

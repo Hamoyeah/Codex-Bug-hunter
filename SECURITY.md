@@ -2,7 +2,7 @@
 
 ## Scope and authorized-use posture
 
-`claude-bughunter` is a knowledge bundle. It contains methodology, payloads, bypass tables, detection patterns, and reporting templates derived from publicly disclosed bug-bounty reports and authorized engagements.
+`Codex-Bug-hunter` is a knowledge bundle. It contains methodology, payloads, bypass tables, detection patterns, and reporting templates derived from publicly disclosed bug-bounty reports and authorized engagements.
 
 The skills are intended for use against assets you **own** or have **written authorization to assess**:
 
@@ -90,7 +90,7 @@ The bundle's `report-writing` and `bugcrowd-reporting` skills produce platform-r
 
 ## Responsible-use commitments by users of this bundle
 
-By using `claude-bughunter`, you acknowledge:
+By using `Codex-Bug-hunter`, you acknowledge:
 
 - You are responsible for ensuring you have authorization to test any target you point Claude at
 - You will respect program scope, RoE, and the spirit (not just the letter) of bug-bounty rules

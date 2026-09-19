@@ -1,8 +1,8 @@
-# Claude-BugHunter contributor and runtime guidance
+# Codex-Bug-hunter contributor and runtime guidance
 
-This repository supports both Claude Code and OpenAI Codex. Keep shared content
-provider-neutral; put Claude slash-command behavior in `commands/` and expose equivalent
-Codex behavior through `skills/bughunter/SKILL.md`.
+This is the Codex-first distribution. Keep shared content provider-neutral, expose the
+primary workflow through `skills/bughunter/SKILL.md`, and retain Claude slash-command
+behavior in `commands/` only as a compatibility layer.
 
 For security work, require an explicit authorized scope before active requests. Deny rules
 win, recon discoveries never widen scope automatically, state-changing proof of concept

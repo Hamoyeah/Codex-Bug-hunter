@@ -5,14 +5,14 @@
     "url": "https://github.com/elementalsouls"
   },
   "metadata": {
-    "description": "Offensive-security skill bundles for Claude Code by ElementalSoul.",
+    "description": "Codex-first security skills with optional Claude Code compatibility.",
     "version": "2.2.0"
   },
   "plugins": [
     {
-      "name": "claude-bughunter",
+      "name": "codex-bug-hunter",
       "source": "./",
-      "description": "84-skill provider-neutral bug-hunting and external red-team bundle for Claude Code and OpenAI Codex, with 15 Claude slash commands and a Codex workflow router.",
+      "description": "84-skill Codex-first bug-hunting and external red-team bundle with a workflow router and optional Claude slash commands.",
       "version": "2.2.0",
       "author": {
         "name": "Sachin Sharma",

@@ -1,5 +1,5 @@
 # =====================================================================
-# install.ps1 — Install Claude-BugHunter bundle (Windows / PowerShell)
+# install.ps1 — Install Codex-Bug-hunter bundle (Windows / PowerShell)
 #
 # Native Windows port of install.sh. No WSL, no bash required.
 # Requires: Windows PowerShell 5.1+ or PowerShell 7+.
@@ -65,7 +65,7 @@ $InstallHome = if ($env:CBH_INSTALL_HOME) {
 $StateRoot  = if ($CodexOnly) { Join-Path $InstallHome '.agents' } else { Join-Path $InstallHome '.claude' }
 $BackupDest = Join-Path $StateRoot "install-backups\$Timestamp"
 
-$BundleName   = 'claude-bughunter'
+$BundleName   = 'codex-bug-hunter'
 $ManifestDir  = Join-Path $StateRoot '.skill-manifests'
 $Manifest     = Join-Path $ManifestDir "$BundleName.txt"
 $ScriptsDest  = Join-Path $InstallHome '.claude\scripts'
@@ -209,9 +209,15 @@ $HAS_CLAUDE = $false; $HAS_OPENCODE = $false; $HAS_CODEX = $false; $HAS_HERMES =
 # --- Uninstall ---------------------------------------------------------
 function Uninstall-Bundle {
     if (-not (Test-Path -LiteralPath $Manifest)) {
-        Write-Host "No manifest at $Manifest -- nothing tracked to uninstall."
-        Write-Host "(Installed before manifests existed? See INSTALL.md for manual removal.)"
-        return
+        $legacyManifest = Join-Path $ManifestDir 'claude-bughunter.txt'
+        if (Test-Path -LiteralPath $legacyManifest) {
+            $script:Manifest = $legacyManifest
+            Write-Host "Using legacy Claude-BugHunter manifest: $Manifest"
+        } else {
+            Write-Host "No manifest at $Manifest -- nothing tracked to uninstall."
+            Write-Host "(Installed before manifests existed? See INSTALL.md for manual removal.)"
+            return
+        }
     }
     Write-Host "Uninstalling $BundleName using $Manifest"
     $others = @(Get-ChildItem -LiteralPath $ManifestDir -Filter *.txt -File -ErrorAction SilentlyContinue |
@@ -293,7 +299,7 @@ if (-not (Test-Path -LiteralPath $SkillsSource -PathType Container)) {
 $skillCount = (Get-ChildItem -LiteralPath $SkillsSource -Directory).Count
 
 # --- Claude Code: skills + commands + hunt.ps1 -------------------------
-Write-Host "Installing Claude-BugHunter bundle from $RepoDir"
+Write-Host "Installing Codex-Bug-hunter bundle from $RepoDir"
 if ($CODEX_ONLY) { Write-Host "(Codex-only mode; Claude settings and PowerShell profile stay untouched)" }
 elseif ($DO_AGENTS -or $DO_HERMES -or $DO_ANTIGRAVITY) { Write-Host "(multi-harness mode)" }
 Write-Host ''
@@ -342,7 +348,7 @@ if ($NO_PROFILE) {
         }
     }
     if ($needLine) {
-        $new = "# Bug-bounty engagement scaffolding (Claude-BugHunter)`r`n$dotLine`r`n"
+        $new = "# Bug-bounty engagement scaffolding (Codex-Bug-hunter)`r`n$dotLine`r`n"
         if (Test-Path -LiteralPath $prof) {
             Add-Content -LiteralPath $prof -Value "`r`n$new" -Encoding UTF8
         } else {

@@ -1,6 +1,7 @@
 # Installation Guide
 
-Step-by-step setup for the Claude-BugHunter skill bundle.
+Step-by-step setup for the Codex-Bug-hunter skill bundle. Codex is the primary
+runtime; the other harnesses below are optional compatibility targets.
 
 ## Prerequisites
 
@@ -286,7 +287,7 @@ and `osint-methodology` — are **kept** if Claude-OSINT's manifest still claims
 so uninstalling one bundle never breaks the other. (Install backups under
 `~/.claude/install-backups/` are left in place; delete them manually if you want.)
 
-If you installed via the **plugin** instead of the script: `/plugin uninstall claude-bughunter@elementalsouls`.
+If you installed via the **plugin** instead of the script: `/plugin uninstall codex-bug-hunter@hamoyeah`.
 
 Burp MCP, if you wired it, is removed separately: `claude mcp remove burp` or
 `codex mcp remove burp`, depending on the provider.

@@ -1,0 +1,8 @@
+interface:
+  display_name: "Codex Bug Hunter"
+  short_description: "Authorized recon, validation, and reporting workflows"
+  brand_color: "#FF2D4F"
+  default_prompt: "Use $bughunter to map this authorized target's attack surface while enforcing the declared scope."
+
+policy:
+  allow_implicit_invocation: true

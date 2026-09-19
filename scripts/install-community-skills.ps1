@@ -4,7 +4,7 @@
 # Native Windows port of install-community-skills.sh. No WSL, no bash.
 # Requires: git, Windows PowerShell 5.1+ or PowerShell 7+.
 #
-# Claude-BugHunter ships a frozen snapshot of shuvonsec's skills and
+# Codex-Bug-hunter ships a frozen snapshot of shuvonsec's skills and
 # commands inside skills\ and commands\. The default install path is
 # install.ps1 -- running this script is NOT required for first-time setup.
 #

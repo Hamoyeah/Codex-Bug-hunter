@@ -2,7 +2,7 @@
 
 `manifest.json` is the data contract between the **recon** phase
 ([Claude-OSINT](https://github.com/elementalsouls/Claude-OSINT) · `offensive-osint` ·
-`cbh recon`) and the **hunt** phase (Claude-BugHunter · `hunt` · `cbh surface` · `/hunt`).
+`cbh recon`) and the **hunt** phase (Codex-Bug-hunter · `$bughunter hunt` · `cbh surface`).
 One file, written to `recon/<target>/manifest.json`, that the hunt side ingests so recon
 output flows straight into the engagement instead of being re-typed.
 

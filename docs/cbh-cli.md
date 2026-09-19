@@ -1,6 +1,6 @@
-# `cbh` — claude-bughunter CLI
+# `cbh` — Codex-Bug-hunter CLI
 
-> **Deterministic companion interface.** For LLM-guided work, use Claude Code slash commands or Codex's `$bughunter` router (`hunt`, `recon`, `triage`, `report`, `validate`, `chain`, `autopilot`, `scope`, etc.).
+> **Deterministic companion interface.** For LLM-guided work, use Codex's `$bughunter` router (`hunt`, `recon`, `triage`, `report`, `validate`, `chain`, `autopilot`, `scope`, etc.). Claude slash commands remain available as a compatibility layer.
 >
 > `cbh` is the **terminal-native deterministic runner** — use it outside an agent conversation, in CI/CD, for scheduled recon, or to verify labs reproducibly.
 >
@@ -15,12 +15,12 @@
 
 | Use case | Use this |
 |---|---|
-| Hunting a new target conversationally, applying judgment | **Claude slash commands or `$bughunter` in Codex** |
+| Hunting a new target conversationally, applying judgment | **`$bughunter` in Codex** |
 | Building a chain across multiple primitives | **Agent workflow** — the LLM keeps state across the conversation |
 | Scheduled / CI / scripted runs | **`cbh`** — deterministic exit codes, identical output across runs |
 | Bulk passive recon (hundreds of subdomains) | **`cbh recon`** — real `subfinder`/`dig`/`curl`, no LLM in the loop |
 | Verifying labs / reproducing claims | **`cbh`** — every Phase 2 doc's curls work via `cbh` too |
-| Reading skills without Claude Code installed | **`cbh`** + browsing `skills/` and `docs/disclosed-reports/` |
+| Reading skills without an agent runtime installed | **`cbh`** + browsing `skills/` and `docs/disclosed-reports/` |
 | Triage gate at PR time / pre-submit linting | **`cbh triage`** — deterministic keyword-match against the 7-Question Gate |
 
 The two interfaces consume the same content (`skills/` + `docs/disclosed-reports/`). They produce different outputs because they execute differently. Pick by context, not by preference.

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 800" width="1920" height="800" role="img" aria-label="Claude-BugHunter - cross-harness Agent Skills for bug hunting and external red-team work">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 800" width="1920" height="800" role="img" aria-label="Codex-Bug-hunter - Codex-first Agent Skills for bug hunting and external red-team work">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#08080d"/>
@@ -40,7 +40,7 @@
 
   <!-- meta row -->
   <g class="mono" font-size="12" letter-spacing="2.2">
-    <text x="80" y="52" class="dim">CLAUDE-BUGHUNTER / MAIN / CROSS-HARNESS AGENT SKILLS</text>
+    <text x="80" y="52" class="dim">CODEX-BUG-HUNTER / MAIN / CODEX-FIRST AGENT SKILLS</text>
     <text x="1840" y="52" text-anchor="end" class="muted">github.com/Hamoyeah/Codex-Bug-hunter</text>
   </g>
   <line x1="80" y1="72" x2="1840" y2="72" stroke="#1d1f2b"/>
@@ -72,7 +72,7 @@
 
   <!-- title lockup -->
   <g class="sans" font-weight="800">
-    <text x="290" y="262" font-size="116" letter-spacing="-2" class="white" textLength="380" lengthAdjust="spacingAndGlyphs">claude</text>
+    <text x="290" y="262" font-size="116" letter-spacing="-2" class="white" textLength="380" lengthAdjust="spacingAndGlyphs">codex</text>
     <text x="716" y="262" font-size="116" font-weight="300" class="dim">/</text>
     <text x="782" y="262" font-size="116" letter-spacing="-2" class="red" filter="url(#glow)" textLength="580" lengthAdjust="spacingAndGlyphs">bughunter</text>
   </g>
@@ -84,7 +84,7 @@
     <text x="660" y="336" class="white"><tspan class="red">+ </tspan>RED TEAM PIPELINE</text>
     <text x="1000" y="336" class="white"><tspan class="red">+ </tspan>CROSS-HARNESS AGENT SKILLS</text>
   </g>
-  <text x="290" y="384" class="mono muted" font-size="19" letter-spacing="0.2">82 Agent Skills for bug hunting and external red-team work - Claude Code, OpenCode, Codex CLI, and Hermes Agent.</text>
+  <text x="290" y="384" class="mono muted" font-size="19" letter-spacing="0.2">84 Agent Skills for authorized bug hunting and external red-team work - built for Codex.</text>
 
   <!-- spec card -->
   <g class="mono">
@@ -107,7 +107,7 @@
     <g font-size="13">
       <text x="0" y="40" class="red" font-weight="800">&gt;</text>
       <text x="24" y="40" class="white" font-weight="800" letter-spacing="1.5">CROSS-HARNESS INSTALL</text>
-      <text x="24" y="60" class="muted">Claude Code + OpenCode + Codex + Hermes</text>
+      <text x="24" y="60" class="muted">Codex primary + optional compatible harnesses</text>
 
       <text x="600" y="40" class="red" font-weight="800">&gt;</text>
       <text x="624" y="40" class="white" font-weight="800" letter-spacing="1.5">CODEX-SAFE FRONTMATTER</text>
@@ -136,7 +136,7 @@
     <line x1="0" y1="0" x2="1760" y2="0" stroke="#2a2c3a"/>
     <line x1="842" y1="0" x2="918" y2="0" stroke="#ff2d4f" stroke-width="3"/>
     <g class="sans" font-weight="800" text-anchor="middle">
-      <text x="147" y="66" font-size="52" class="red">83</text>
+      <text x="147" y="66" font-size="52" class="red">84</text>
       <text x="440" y="66" font-size="52" class="red">15</text>
       <text x="733" y="66" font-size="52" class="red">58</text>
       <text x="1027" y="66" font-size="52" class="red">681</text>
@@ -159,11 +159,11 @@
     <circle cx="24" cy="19" r="4" fill="#b81e37"/>
     <circle cx="40" cy="19" r="4" fill="#5f6070"/>
     <circle cx="56" cy="19" r="4" fill="#5f6070"/>
-    <text x="84" y="23" font-size="11" letter-spacing="1.6" class="dim">agent skills session - ~/.claude/skills + ~/.agents/skills + ~/.hermes/skills + ~/.gemini/config/skills</text>
+    <text x="84" y="23" font-size="11" letter-spacing="1.6" class="dim">Codex Agent Skills session - ~/.agents/skills</text>
     <line x1="0" y1="34" x2="1760" y2="34" stroke="#202230"/>
     <text x="24" y="58" font-size="13" font-weight="800" class="red">&gt;</text>
-    <text x="48" y="58" font-size="13" class="white">bash scripts/install.sh --all --burp-mcp</text>
-    <text x="462" y="58" font-size="12" class="dim"># 83 skills across Claude Code, OpenCode, Codex CLI, Hermes Agent, Google AntiGravity</text>
+    <text x="48" y="58" font-size="13" class="white">bash scripts/install.sh --codex-only</text>
+    <text x="462" y="58" font-size="12" class="dim"># 84 skills + $bughunter workflow router for Codex</text>
     <text x="1736" y="58" font-size="12" text-anchor="end" class="red" font-weight="800">SHIP WITH DISCIPLINE</text>
   </g>
 </svg>

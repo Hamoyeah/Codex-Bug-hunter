@@ -361,7 +361,7 @@ When a previously-claimed finding fails reproduction — **never silently drop i
 
 ---
 
-## Operator Notes (Claude-BugHunter)
+## Operator Notes (Codex-Bug-hunter)
 
 > Engagement-derived additions to the vendored foundation. Wisdom from real
 > authorized engagements + Phase 2 verification across this repo's 31+

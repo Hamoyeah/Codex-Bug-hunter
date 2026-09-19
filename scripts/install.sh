@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =====================================================================
-# install.sh — Install Claude-BugHunter bundle (multi-harness)
+# install.sh — Install Codex-Bug-hunter bundle (multi-harness)
 #
 # DEFAULT (no flags): installs into ~/.claude/ for Claude Code —
 #   - skills/*        → ~/.claude/skills/
@@ -48,7 +48,7 @@ BACKUP_DEST="$HOME/.claude/install-backups/$(date +%Y%m%d-%H%M%S)"
 # Footprint tracking: each bundle records what it placed in ~/.claude here, so
 # uninstall removes only its own files and KEEPS skills a sibling bundle (e.g.
 # claude-osint) still owns. The two recon skills are co-owned by both bundles.
-BUNDLE_NAME="claude-bughunter"
+BUNDLE_NAME="codex-bug-hunter"
 MANIFEST_DIR="$HOME/.claude/.skill-manifests"
 MANIFEST="$MANIFEST_DIR/$BUNDLE_NAME.txt"
 
@@ -82,9 +82,15 @@ fi
 # === Uninstall: remove only our footprint; keep skills a sibling bundle owns ===
 uninstall_bundle() {
   if [ ! -f "$MANIFEST" ]; then
-    echo "No manifest at $MANIFEST — nothing tracked to uninstall."
-    echo "(Installed before manifests existed? See INSTALL.md for manual removal.)"
-    return 0
+    legacy_manifest="$MANIFEST_DIR/claude-bughunter.txt"
+    if [ -f "$legacy_manifest" ]; then
+      MANIFEST="$legacy_manifest"
+      echo "Using legacy Claude-BugHunter manifest: $MANIFEST"
+    else
+      echo "No manifest at $MANIFEST — nothing tracked to uninstall."
+      echo "(Installed before manifests existed? See INSTALL.md for manual removal.)"
+      return 0
+    fi
   fi
   echo "Uninstalling $BUNDLE_NAME using $MANIFEST"
   local rel target other owned removed=0 kept=0
@@ -178,7 +184,7 @@ install_skills() {
   echo ""
 }
 
-echo "Installing Claude-BugHunter bundle from $REPO_DIR"
+echo "Installing Codex-Bug-hunter bundle from $REPO_DIR"
 if [ "$CODEX_ONLY" = "1" ]; then echo "(Codex-only mode; Claude settings and shell startup files stay untouched)"
 elif [ "$DO_AGENTS" = "1" ] || [ "$DO_HERMES" = "1" ] || [ "$DO_ANTIGRAVITY" = "1" ]; then echo "(multi-harness mode)"; fi
 echo ""

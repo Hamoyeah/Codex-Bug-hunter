@@ -1,7 +1,7 @@
 """
 Hardened test lab — Flask app with real defenses + intentional FP-shaped behavior.
 
-Used to stress-test the Claude-BugHunter discipline rules:
+Used to stress-test the Codex-Bug-hunter discipline rules:
 - OOB-Or-It-Didn't-Happen Gate
 - Marker Discipline
 - Body-Diff Rule

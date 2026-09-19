@@ -23,7 +23,7 @@ def ps_solved(instance_url, timeout=12):
     could not be read (expired instance / wrong URL / network)."""
     url = instance_url.rstrip("/") + "/"
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "claude-bughunter-eval-oracle"})
+        req = urllib.request.Request(url, headers={"User-Agent": "codex-bug-hunter-eval-oracle"})
         html = urllib.request.urlopen(req, timeout=timeout).read().decode("utf-8", "replace")
     except Exception:
         return None, False

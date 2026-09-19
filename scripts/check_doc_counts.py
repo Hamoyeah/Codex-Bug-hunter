@@ -56,15 +56,11 @@ def read(path):
 # (file, regex with one capture group per checked number, key or tuple of keys
 # into the `actual` dict, human label for error messages)
 CHECKS = [
-    ("README.md", r"\*\*(\d+) skills\*\* · 15 Claude slash commands", "total", "hero line skill count"),
-    ("README.md", r"skills\*\* · (\d+) Claude slash commands", "commands", "hero line command count"),
-    ("README.md", r"\| Path \| (\d+) skills \+ workflows \|", "total", "install-path comparison table"),
-    ("README.md", r"\*\*(\d+) skills\*\*, auto-loaded", "total", "'What's inside' intro"),
-    ("README.md", r"(\d+) `hunt-\*` skills curated from", "hunt", "'Hunt webapps' bullet"),
-    ("README.md", r"Also ships \*\*(\d+) slash commands\*\*", "commands", "documentation table footer"),
-    ("README.md", r"\(8 of (\d+) skills \+ (\d+) slash commands\)", ("total", "commands"), "vendored-foundation credit"),
+    ("README.md", r"contains \*\*(\d+) skills\*\*", "total", "Codex distribution skill count"),
+    ("README.md", r"retains \*\*(\d+) slash commands\*\*", "commands", "compatibility command count"),
+    ("README.md", r"includes \*\*(\d+) `hunt-\*` skills\*\*", "hunt", "hunt skill count"),
     ("SECURITY.md", r"installing (\d+) `SKILL\.md` files", "total", "supply-chain-trust intro"),
-    ("USAGE.md", r"the (\d+)-skill Claude-BugHunter bundle", "total", "doc intro"),
+    ("USAGE.md", r"the (\d+)-skill Codex-Bug-hunter bundle", "total", "doc intro"),
     ("USAGE.md", r"copies (\d+) skills into ~/\.agents/skills", "total", "Codex quickstart code block"),
     ("USAGE.md", r"(\d+) `hunt-\*` skills \+ \d+ enterprise-platform skills", "hunt", "phase-3 architecture table row"),
     ("USAGE.md", r"### Hunt — (\d+) per-class web skills", "hunt", "skill-inventory section header"),
@@ -100,22 +96,6 @@ def check_assertions(actual):
     return errors
 
 
-def check_readme_table_sum(errors, actual):
-    """README's 'What's inside' category table must sum to the total skill count."""
-    text = read("README.md")
-    m = re.search(r"\| Category \| # \| Examples \|\n\|[-| ]+\n((?:\|.*\n)+)", text)
-    if not m:
-        errors.append("README.md: could not locate 'What's inside' category table to sum")
-        return
-    total = 0
-    for row in m.group(1).strip("\n").split("\n"):
-        cells = [c.strip() for c in row.strip("|").split("|")]
-        if len(cells) >= 2 and cells[1].isdigit():
-            total += int(cells[1])
-    if total != actual["total"]:
-        errors.append(f"README.md: 'What's inside' category table sums to {total}, actual total is {actual['total']}")
-
-
 def check_catalog_section_sum(errors, actual):
     """docs/skills.md's generated section headers ('## Name (N)') must sum to the total."""
     text = read("docs/skills.md")
@@ -131,14 +111,13 @@ def main():
     actual = {"total": total, "hunt": hunt, "commands": commands}
 
     errors = check_assertions(actual)
-    check_readme_table_sum(errors, actual)
     check_catalog_section_sum(errors, actual)
 
     for e in errors:
         print(f"::error:: {e}" if os.environ.get("GITHUB_ACTIONS") else f"ERROR {e}")
 
     print(f"\nGround truth: {total} skills ({hunt} hunt-*), {commands} slash commands.")
-    print(f"Checked {len(CHECKS)} doc assertions + 2 structural sums: {len(errors)} error(s).")
+    print(f"Checked {len(CHECKS)} doc assertions + 1 structural sum: {len(errors)} error(s).")
     return 1 if errors else 0
 
 

@@ -1,6 +1,6 @@
 # Verification — OWASP Juice Shop walkthrough
 
-> Reproducible end-to-end verification of the Claude-BugHunter stack against a real (deliberately vulnerable) target. Every command below is copy-pasteable. Every result is the actual HTTP response from a live Juice Shop instance — pass or fail.
+> Reproducible end-to-end verification of the Codex-Bug-hunter stack against a real (deliberately vulnerable) target. Every command below is copy-pasteable. Every result is the actual HTTP response from a live Juice Shop instance — pass or fail.
 >
 > **Run date:** 2026-05-15 to 2026-05-16 (build + test overnight)
 > **Verification status:** 4/5 live tests passed, 1 verified by source inspection, 1 discipline-rule check (FP gate) documented.

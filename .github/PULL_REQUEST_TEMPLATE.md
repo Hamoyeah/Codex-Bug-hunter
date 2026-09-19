@@ -1,4 +1,4 @@
-<!-- Thanks for contributing to claude-bughunter. Keep PRs focused. -->
+<!-- Thanks for contributing to Codex-Bug-hunter. Keep PRs focused. -->
 
 ## What does this change?
 

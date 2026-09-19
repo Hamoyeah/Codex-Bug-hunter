@@ -1,6 +1,6 @@
 # Credits
 
-Claude-BugHunter is **the author's bug-hunting stack**, with a vendored foundation layer from upstream community work. Full attribution below.
+Codex-Bug-hunter is the Codex-first adaptation of **the upstream author's bug-hunting stack**, with a vendored foundation layer from community work. Full attribution is retained below.
 
 ---
 

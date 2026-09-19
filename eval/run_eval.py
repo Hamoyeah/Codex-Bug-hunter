@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-run_eval.py — v0 autonomous-hunt-loop eval harness for Claude-BugHunter.
+run_eval.py — v0 autonomous-hunt-loop eval harness for Codex-Bug-hunter.
 
 Measures whether the hunt-* skills let a headless Claude Code agent autonomously
 exploit known-vulnerable targets — and by how much, vs. the same agent with skills

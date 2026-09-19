@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-cbh — claude-bughunter CLI.
+cbh — Codex-Bug-hunter CLI.
 
 Bridges the repo's skill content into a real runner. Five subcommands compose
 the engagement loop:
@@ -869,7 +869,7 @@ def cmd_surface(args: argparse.Namespace) -> int:
     if idf:
         say(color(f"  identity fabric: {', '.join(idf.keys())}", "cyan"))
     say()
-    say(f"  Next: {color('bughunter hunt ' + target, 'bold')} in Claude Code or Codex, "
+    say(f"  Next: {color('$bughunter hunt ' + target, 'bold')} in Codex, "
         f"or {color('cbh classify <url>', 'bold')} for a single URL")
     return 0
 
@@ -883,7 +883,7 @@ def main() -> int:
             stream.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(
         prog="cbh",
-        description=("claude-bughunter CLI — terminal-native deterministic runner.\n"
+        description=("Codex-Bug-hunter CLI — terminal-native deterministic runner.\n"
                      "Use the provider-neutral bughunter skill for LLM-guided workflows. "
                      "Use cbh for CI/CD, scripted runs, and deterministic verification."),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -896,7 +896,7 @@ def main() -> int:
               cbh report findings/idor-2026-05-15.md --platform bugcrowd --out draft.md
 
             For LLM-driven hunting with full skill context, invoke the bughunter skill
-            in Claude Code or Codex: hunt, recon, triage, report, validate, chain, autopilot.
+            in Codex: hunt, recon, triage, report, validate, chain, autopilot.
             See docs/cbh-cli.md for the "when to use which" matrix.
             """),
     )

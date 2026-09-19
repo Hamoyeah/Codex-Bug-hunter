@@ -1,6 +1,6 @@
 {
-  "name": "claude-bughunter",
-  "description": "Provider-neutral bug-hunting and external red-team bundle for Claude Code and OpenAI Codex, with specialist skills, guarded workflows, deterministic tooling, and optional Burp MCP integration.",
+  "name": "codex-bug-hunter",
+  "description": "Codex-Bug-hunter compatibility plugin for Claude Code, with specialist skills, guarded workflows, deterministic tooling, and optional Burp MCP integration.",
   "version": "2.2.0",
   "author": {
     "name": "Sachin Sharma",

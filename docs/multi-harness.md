@@ -1,7 +1,7 @@
 ---
 title: Multi-harness install
 nav_order: 3
-description: Run the Claude-BugHunter skills on OpenCode, Codex, Hermes Agent, and Google AntiGravity — not just Claude Code.
+description: Run Codex-Bug-hunter on Codex and optional compatible Agent Skills harnesses.
 ---
 
 # Multi-harness install

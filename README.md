@@ -1,54 +1,36 @@
-![claude-bughunter banner](assets/banner-v2.svg)
+![Codex-Bug-hunter banner](assets/banner-v2.svg)
 
 # Codex-Bug-hunter
 
-> A provider-neutral Agent Skills bundle for bug hunting and external red-team work · **84 skills** · 15 Claude slash commands + a Codex workflow router · **681 disclosed-report patterns** (433 now individually cited & auditable) across 24 core vulnerability classes · enterprise identity + infrastructure attack matrices · engagement-folder scaffolding · optional Burp MCP integration.
+Codex-first Agent Skills and deterministic tooling for authorized bug-bounty,
+web application security, recon, validation, and external red-team work.
 
-Built by **[Sachin Sharma](https://www.linkedin.com/in/sachinsharma8080/)** — Bug Hunting & GenAI Security Research.
+This distribution contains **84 skills**, a `$bughunter` workflow router, the
+`cbh` command-line runner, guarded engagement workflows, and optional Burp MCP
+integration. It also retains **15 slash commands** for Claude Code compatibility.
+It is designed to work immediately after a clone and Codex-only installation.
 
-This repository is the Codex-compatible distribution maintained at
-[`Hamoyeah/Codex-Bug-hunter`](https://github.com/Hamoyeah/Codex-Bug-hunter), based on the
-original [`elementalsouls/Claude-BugHunter`](https://github.com/elementalsouls/Claude-BugHunter).
-Original authorship, license, and upstream history are retained.
+> Use this project only on assets you own or have explicit permission to test.
+> Recon results never expand the authorized scope automatically, and
+> state-changing proof-of-concept actions require operator approval.
 
-<p align="center">
-  <sub>SPONSORED BY</sub>
-  <br/>
-  <a href="https://www.atlascloud.ai/console/coding-plan">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/atlas-cloud-dark.svg">
-      <img alt="Atlas Cloud" src="assets/sponsors/atlas-cloud-light.svg" height="36">
-    </picture>
-  </a>
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://threatwatch360.com">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/tw360-dark.svg">
-      <img alt="ThreatWatch360" src="assets/sponsors/tw360-light.svg" height="30">
-    </picture>
-  </a>
-</p>
+This repository is maintained at
+[`Hamoyeah/Codex-Bug-hunter`](https://github.com/Hamoyeah/Codex-Bug-hunter).
+It is based on
+[`elementalsouls/Claude-BugHunter`](https://github.com/elementalsouls/Claude-BugHunter);
+upstream authorship, licenses, and content attribution are preserved.
 
----
+## Quick start with Codex
 
-## What is this?
+### Windows PowerShell
 
-`claude-bughunter` is an Agent Skills bundle for **Claude Code and OpenAI Codex**. Install once and the agent gains the techniques, chain templates, VRT mappings, platform CVE chains, validation gates, and evidence hygiene needed for authorized work.
+```powershell
+git clone https://github.com/Hamoyeah/Codex-Bug-hunter.git
+cd Codex-Bug-hunter
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexOnly
+```
 
-Four layers stack:
-
-- **Think** — `bb-methodology` + `redteam-mindset`: the 5-phase non-linear workflow, critical-thinking framework, and red-team operator discipline.
-- **Hunt webapps** — 58 `hunt-*` skills curated from 681 disclosed HackerOne reports: per-class detection patterns, payloads, bypass tables, and chain templates.
-- **Hit the perimeter** — enterprise platform chains (M365/Entra, Okta, vCenter, SSL-VPN appliances, SharePoint, cloud IAM): current 2024–2026 CVE chains + post-credential escalation.
-- **Ship it** — `triage-validation` + reporting + `evidence-hygiene`: the 7-Question Gate, VRT-aware severity, OOS rebuttals, PII redaction, and red-team deliverables.
-
-All triggered automatically by topic — describe what you're testing in plain English and the relevant skill loads. No invocation by name.
-
----
-
-## Quickstart
-
-**Codex — dedicated install (recommended for Codex users):**
+### macOS or Linux
 
 ```bash
 git clone https://github.com/Hamoyeah/Codex-Bug-hunter.git
@@ -56,305 +38,146 @@ cd Codex-Bug-hunter
 bash scripts/install.sh --codex-only
 ```
 
-```powershell
-# Windows PowerShell 5.1+; works even when .ps1 execution is restricted globally
-git clone https://github.com/Hamoyeah/Codex-Bug-hunter.git
-cd Codex-Bug-hunter
-powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -CodexOnly
-```
-
-Start a new Codex thread so it refreshes the skill index, then invoke
-`$bughunter hunt <authorized-target>` or ask for a BugHunter recon/triage/report workflow.
-The Codex-only installer writes `~/.agents/skills` and does not modify `~/.claude` or your shell profile.
-
-**Option A — install as a Claude Code plugin (recommended).** From inside Claude Code:
+Start a new Codex thread after installation so the skill index is refreshed.
+Then invoke the router explicitly:
 
 ```text
-/plugin marketplace add Hamoyeah/Codex-Bug-hunter
-/plugin install claude-bughunter@hamoyeah
+$bughunter recon example.com
+$bughunter hunt example.com
+$bughunter triage
+$bughunter report
 ```
 
-All 84 skills + 15 commands load namespaced under `claude-bughunter:` and update when you bump the plugin version — no files copied into `~/.claude/`.
-
-**Option B — copy install (no plugin system / pin to a clone):**
-
-```bash
-git clone https://github.com/Hamoyeah/Codex-Bug-hunter.git
-cd Codex-Bug-hunter
-```
-
-```bash
-# macOS / Linux
-bash scripts/install.sh
-
-# Windows (PowerShell)
-pwsh ./scripts/install.ps1
-```
-
-Both copy the skills + commands into `~/.claude/` (macOS/Linux) or `%USERPROFILE%\.claude\` (Windows) and wire the `hunt` engagement scaffolder.
-
-**What each install path gives you:**
-
-| Path | 84 skills + workflows | `cbh` CLI | `hunt` scaffolder |
-|---|---|---|---|
-| **Codex-only copy** | ✅ `~/.agents/skills` + `bughunter` router | ✅ from the clone | ✅ from the clone |
-| **A — Claude plugin** | ✅ namespaced under `claude-bughunter:` | ➕ separate `pipx install` | ❌ clone-only |
-| **B — Claude copy** | ✅ copied into `~/.claude/` | ✅ from the clone | ✅ from the clone |
-
-The plugin is the fastest path to the skills + slash commands. The terminal-native
-`cbh` runner installs standalone — `pipx install git+https://github.com/Hamoyeah/Codex-Bug-hunter`
-— so plugin users can add it without a full clone (see [`cbh` CLI](docs/cbh-cli.md)).
-The `hunt` engagement scaffolder ships with the clone (Option B).
-
-That's it. Open Claude Code and describe what you're testing in plain English — the right skill loads automatically, no invocation by name:
+You can also ask naturally:
 
 ```text
-> Testing acme.com — an in-scope HackerOne target. Run recon and rank the surface.
-
-  ⟳ loading skills: web2-recon, offensive-osint, bb-methodology …
-    → subdomain enum (subfinder + crt.sh) … 47 hosts
-    → live hosts (httpx) … 12 · tech fingerprint … 6 distinct stacks
-    → ranked surface: api.acme.com (GraphQL, introspection ON)  ← start here
-                      auth.acme.com (OAuth, SSO)               ← hunt-oauth
-
-  Next: want me to probe the GraphQL introspection + OAuth redirect_uri?
+I am authorized to test example.com. Map the attack surface, remain inside
+that exact scope, and rank the most promising areas for manual review.
 ```
 
-→ Full [Installation guide](INSTALL.md) · [Usage guide](USAGE.md) · [searchable skill catalog](docs/skills.md).
+The Codex-only installer copies the skills to `~/.agents/skills`, does not write
+to `~/.claude`, and does not modify your shell profile.
 
-> The block above is an illustrative transcript. To record a real demo of your own session: `asciinema rec demo.cast` → upload to [asciinema.org](https://asciinema.org) and drop the badge here.
+## What is included
 
----
-
-## Runs on multiple agent harnesses
-
-![One install, agent harnesses — Claude Code, OpenCode, Codex CLI, Hermes Agent, Google AntiGravity](assets/harness-routing.svg)
-
-The skills are plain [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) — the same `SKILL.md` format that **Claude Code · OpenCode · OpenAI Codex CLI · Hermes Agent · Google AntiGravity** all load. One command installs them everywhere:
-
-```bash
-# macOS / Linux
-bash scripts/install.sh --all --burp-mcp
-
-# Windows (PowerShell)
-pwsh ./scripts/install.ps1 -All -BurpMcp
-```
-
-| Harness | Target Skill Directory | Flag |
-|---|---|---|
-| **Claude Code** (baseline) | `~/.claude/skills/` | *(default)* |
-| **OpenCode** | reads `~/.claude/skills/` & `~/.agents/skills/` | *(default)* / `--agents` |
-| **OpenAI Codex CLI** | `~/.agents/skills/` | `--codex-only` / `-CodexOnly` |
-| **Hermes Agent** | `~/.hermes/skills/` | `--hermes` |
-| **Google AntiGravity** | `~/.gemini/config/skills/` | `--antigravity` |
-
-`--all` (`-All`) detects installed harnesses and copies skills to each harness's path (`~/.claude/skills`, `~/.agents/skills`, `~/.hermes/skills`, `~/.gemini/config/skills`); `--burp-mcp` (`-BurpMcp`) wires the Burp MCP server into each. Codex receives the `bughunter` router skill, which maps all 15 workflows to provider-neutral modes; Claude Code keeps the original slash commands.
-
-→ [Multi-harness guide](docs/multi-harness.md)
-
----
-
-## Scope — what this bundle is for, and what it isn't
-
-This bundle covers the **external attack surface** — anything reachable from the internet without first compromising an internal endpoint.
-
-### In scope
-
-- **Bug bounty hunting** — web apps, APIs, SaaS, GraphQL, OAuth, JWT, file upload, IDOR, SSRF, RCE chains
-- **Web application pentesting** — full hunt-* coverage of OWASP-mapped bug classes + discipline rules
-- **External red-team engagements** — initial-access against internet-facing enterprise estate: M365 / Entra ID, Okta-as-IdP, SharePoint on-prem (ToolShell + legacy SOAP), VMware vCenter / Workspace ONE, SSL VPN appliances (Cisco / Fortinet / Citrix / Palo Alto / Pulse / SonicWall / F5), Android APK red-team, supply-chain recon
-- **Cloud misconfig + post-credential escalation** — public S3, IMDS chains, STS AssumeRole, cross-account confused-deputy
-- **Recon + OSINT** — subdomain enum, identity-fabric mapping, certificate transparency, JS analysis, secret scanning
-- **Reporting** — H1, Bugcrowd (VRT-aware), Intigriti, Immunefi, plus client-facing red-team deliverable format
-
-### Out of scope (deliberate — not gaps, design decisions)
-
-- **Internal Active Directory attacks** — BloodHound, Kerberoasting, ASREProast, DCSync, Pass-the-Hash, AD CS abuse, ntlmrelayx, Responder, PetitPotam, etc. Different operational risk profile; needs different tooling and judgment. **Future bundle, not this one.**
-- **C2 frameworks** — Cobalt Strike, Sliver, Mythic, Havoc, BRC4 tradecraft. Out of scope for external-only engagement model.
-- **Post-exploit / persistence / lateral** — Mimikatz/comsvcs LSASS dumping, golden/silver tickets, named-pipe impersonation, persistence (registry, scheduled tasks, WMI events, COM hijacking), token theft. These start after the perimeter has already broken — different bundle territory.
-- **Evasion** — AMSI bypass, ETW patching, AV/EDR bypass. Tied to C2 tradecraft above.
-- **iOS pentesting / hardware / RF / ICS** — out of scope by design.
-- **Binary exploitation / kernel pwn / browser internals** — different skill universe.
-
-If you're running an internal red team that includes domain-takeover chains via Kerberos or lateral movement, **this bundle won't help you in those phases** — and we'd rather say that up front than have you find out mid-engagement. The external surface handoff to internal-RT tooling (Impacket, NetExec, CrackMapExec, Rubeus, Certify, BloodHound) is intentionally outside our scope. **Coverage for internal AD and post-exploit may come in a future update.**
-
----
-
-## What's inside
-
-**84 skills**, auto-loaded by topic — no invocation by name. Coverage across the external attack surface:
-
-| Category | # | Examples |
-|---|---|---|
-| Hunt — web app vuln classes | 58 | XSS, SQLi, SSRF, IDOR, LFI, SSTI, XXE, CSRF, CORS, open-redirect, SharePoint, ASP.NET/NTLM |
-| Enterprise platform attack ★ | 10 | M365/Entra, Okta, cloud-IAM-deep, vCenter, enterprise VPN, APK/iOS red-team pipelines, supply-chain recon |
-| Reporting & validation | 6 | triage-validation, evidence-hygiene, report-writing, bugcrowd-reporting |
-| Recon & OSINT | 5 | web2-recon, offensive-osint, osint-methodology, recon-scope-triage |
-| Methodology & mindset | 4 | bb-methodology, bug-bounty, redteam-mindset, bb-local-toolkit |
-| Provider workflow routing | 1 | bughunter (Codex and Agent Skills clients) |
-
-Full searchable catalog → **[docs/skills.md](docs/skills.md)**. Also ships **15 slash commands** (`/hunt`, `/recon`, `/report`, …) and a deterministic **engagement engine** (`engine/`) that maps a target's attack surface and routes each finding to the skill that handles it.
-
----
-
-## How it works
-
-A 6-phase, non-linear workflow — **recon → map & rank → hunt → validate → report** — with scope enforced in code and a **7-Question Gate** before anything is submitted. Two ways to drive it:
-
-- **Plain English** — describe what you're testing and the relevant skill loads automatically.
-- **Claude slash commands / Codex `$bughunter` + `cbh` CLI** — engagement-folder structure, state, and orchestration.
-
-→ [Usage guide & worked example](USAGE.md) · [6-phase architecture & skill-to-phase map](docs/architecture.md) · [`cbh` CLI](docs/cbh-cli.md)
-
----
-## Authorization
-
-These skills are intended for assets you **own** or have **written authorization to assess** (bug-bounty in-scope assets, pentest engagement letters, CTF challenges, your own infrastructure).
-
-The skills include validation gates that auto-trigger when you point Claude at unverified third-party targets — `triage-validation`'s 7-Question Gate explicitly asks whether the asset is in scope (Q3) and on the program's accepted-impact list (Q2). The `bugcrowd-reporting` skill includes researcher-side hygiene (Bugcrowdninja alias, account-state restoration, friendly-tester posture) that signals legitimate authorized testing to the target's fraud team.
-
-The bundle explicitly **excludes**: weaponizing 0-days against unauthorized targets, post-exploitation tooling, malware development, mass-targeting infrastructure. See [`SECURITY.md`](SECURITY.md) for the full posture.
-
-> **Heads-up — Anthropic runtime cyber safeguards.** Anthropic's models apply real-time safeguards that **block "vulnerability exploitation or offensive security tooling development" by default** — so even *authorized, in-scope* work can hit a refusal that isn't this bundle's doing. If you do authorized offensive security (pentest / bug bounty / red team), enroll in Anthropic's **free, application-based [Cyber Verification Program (CVP)](https://claude.com/form/cyber-use-case)** to get safeguards adjusted for legitimate dual-use work. (Mass data exfiltration and ransomware development stay prohibited and are *not* adjustable.) Details: [Anthropic — real-time cyber safeguards](https://support.claude.com/en/articles/14604842-real-time-cyber-safeguards-on-claude).
-
-### Why your model switched mid-session
-
-Separate from refusals, and easy to miss. On **Opus 5**, a narrow set of higher-risk cyber requests —
-Anthropic names *exploit generation*, *binary-based vulnerability scanning* and *penetration testing* —
-**fall back to Opus 4.8** rather than being refused. You get a notice and the response is labelled with
-the model that answered, but in a long agentic run that is easy to scroll past, so it can look like
-Opus 5 quietly got worse. See [why Claude switched models](https://support.claude.com/en/articles/16049681-why-claude-switched-models-in-your-conversation-with-opus-5).
-
-What to do depends on what you are actually doing:
-
-| Situation | What helps |
+| Component | Purpose |
 |---|---|
-| **Auditing your own code** — reviewing a repo you own for defects | Say so. "Defensive review of my own repo", "check this against the OWASP Top 10", "secure refactor to remediate" describe the work accurately and read as remediation. This is not a workaround; the work genuinely is defensive. |
-| **Authorized offensive work** — live engagement, PoC for a bounty submission | This is what the bundle is for, and the supported route is [CVP](https://claude.com/form/cyber-use-case). Do not reword an offensive engagement to look defensive to get past a classifier — enroll instead. |
-| **You just want the switching off** | Settings → Capabilities disables automatic model switching. |
+| `skills/bughunter` | Codex workflow router for recon, hunt, validation, reporting, and memory operations |
+| `skills/hunt-*` | Vulnerability-class and framework-specific testing guidance |
+| `skills/web2-recon` | Scope-aware web reconnaissance workflow |
+| `cbh` | Deterministic terminal runner for recon, classification, triage, and reports |
+| `engine` | Resumable engagement orchestration and provider-aware LLM dispatch |
+| `commands` | Legacy Claude Code slash-command compatibility layer |
+| `.codex-plugin` | Codex plugin metadata |
 
-`/hunt` states the engagement frame (authorized, scope-bounded, remediable finding) on its first turn
-for exactly this reason — engagement context belongs in the session explicitly, not implied.
+The skill set includes **58 `hunt-*` skills** and covers recon and OSINT,
+common web vulnerability classes, GraphQL, OAuth, JWT, cloud and enterprise
+perimeter review, evidence hygiene, validation gates, and platform-aware reporting. See the
+[skill catalog](docs/skills.md) for the complete list.
 
----
+## `cbh` command-line runner
+
+Install the CLI directly from the repository:
+
+```bash
+pipx install git+https://github.com/Hamoyeah/Codex-Bug-hunter.git
+```
+
+Examples:
+
+```bash
+cbh recon example.com
+cbh surface example.com
+cbh triage
+```
+
+The CLI is deterministic and can be used without an LLM. Optional tools such
+as `subfinder`, `httpx`, `katana`, `gau`, and Burp improve coverage when they
+are installed, but the core workflow degrades gracefully when they are absent.
+
+See [`docs/cbh-cli.md`](docs/cbh-cli.md) for commands and output formats.
+
+## Optional Burp MCP integration
+
+If Burp Suite and its MCP server extension are already installed, register the
+server with Codex:
+
+```bash
+codex mcp add burp -- java -jar /path/to/mcp-proxy-all.jar
+codex mcp list
+```
+
+Burp is optional. Direct, scope-checked HTTP requests and the deterministic CLI
+remain available without it. Never commit cookies, tokens, raw HAR files, or
+unredacted screenshots.
+
+## Other agent runtimes
+
+Codex is the primary supported experience. The underlying `SKILL.md` files use
+the portable Agent Skills format, and the installers retain optional support
+for Claude Code, OpenCode, Hermes Agent, and Google AntiGravity.
+
+```bash
+bash scripts/install.sh --all
+```
+
+```powershell
+pwsh ./scripts/install.ps1 -All
+```
+
+Claude Code users can still use the compatibility plugin and slash commands,
+but those are not required for Codex. See
+[`docs/multi-harness.md`](docs/multi-harness.md) for the compatibility matrix.
+
+## Project layout
+
+```text
+Codex-Bug-hunter/
+|-- skills/                 Agent Skills, including the BugHunter router
+|-- engine/                 Engagement engine and recon pipeline
+|-- cbh/                    Terminal CLI package
+|-- commands/               Claude Code compatibility commands
+|-- scripts/                Installers, validators, and helper scripts
+|-- docs/                   Architecture and operator documentation
+|-- .codex-plugin/          Codex plugin manifest
+`-- AGENTS.md               Repository-level Codex instructions
+```
+
+## Safety model
+
+- Establish an explicit allowlist before active requests.
+- Deny rules always take precedence over allow rules.
+- Re-check scope after redirects and before each new tool action.
+- Do not treat discovered hosts as authorized automatically.
+- Keep destructive, state-changing, or high-volume actions behind explicit
+  operator approval.
+- Never submit reports automatically.
+- Redact credentials, session material, personal data, and raw evidence before
+  sharing it.
+
+Read [`SECURITY.md`](SECURITY.md) before using the project against a live
+target.
 
 ## Documentation
 
-| Doc | Contents |
-|---|---|
-| [`README.md`](README.md) | This file — overview, quickstart, scope, skill summary |
-| [`INSTALL.md`](INSTALL.md) | Full setup with Burp MCP integration and optional skill regenerator |
-| [`USAGE.md`](USAGE.md) | Workflow walkthrough · decision tree · worked engagement example |
-| [`docs/architecture.md`](docs/architecture.md) | 6-phase architecture · skill-to-phase mapping · engagement composition |
-| [`docs/cbh-cli.md`](docs/cbh-cli.md) | `cbh` CLI — native runner orchestrating recon + classify + triage + report |
-| [`docs/cve-coverage.md`](docs/cve-coverage.md) | CISA KEV coverage snapshot — refreshed weekly via the workflow template at `docs/automation/cve-refresh.yml.template` |
-| [`docs/credits.md`](docs/credits.md) | Full attribution: 43 original skills + 8 vendored from upstream |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | PR guidelines · skill quality standards · scope |
-| [`SECURITY.md`](SECURITY.md) | Authorized-use posture · responsible disclosure · what's excluded |
-| [`LICENSE`](LICENSE) | MIT |
-| [`NOTICE`](NOTICE) | Upstream-skills attribution · no-redistribution note |
-| [`LICENSE-CONTENT`](LICENSE-CONTENT) | CC BY 4.0 (skill methodology, wordlists, docs) |
+- [Installation guide](INSTALL.md)
+- [Usage guide](USAGE.md)
+- [Architecture](docs/architecture.md)
+- [Skill catalog](docs/skills.md)
+- [`cbh` CLI](docs/cbh-cli.md)
+- [Recon manifest](docs/recon-manifest.md)
+- [Contributing](CONTRIBUTING.md)
 
----
+## Attribution and license
 
-## Why this exists
+The Codex adaptation is derived from Claude-BugHunter by Sachin Sharma
+([ElementalSoul](https://github.com/elementalsouls)). Vendored and
+community-derived material is documented in [`NOTICE`](NOTICE) and
+[`docs/credits.md`](docs/credits.md).
 
-Most bug-hunting Claude setups are either too generic (one big "security" prompt) or too fragmented (you bookmark 30 disclosed reports and re-read them every engagement). Neither scales past the second target.
+- Source code is licensed under the [MIT License](LICENSE).
+- Documentation and methodology content are licensed under
+  [CC BY 4.0](LICENSE-CONTENT).
 
-This bundle was built and validated through authorized engagements that exposed different capability gaps:
-
-**Bug-bounty engagement** — surfaced four gaps a starter 3-skill stack could not close:
-
-1. **No hypothesis discipline** — drafts written before validation → wasted hours, hurt validity ratio
-2. **No per-program reporting tactics** — VRT defaults auto-downgraded P3-worthy findings to P4
-3. **No engagement coordination** — findings, evidence, and submission IDs scattered across folders
-4. **No evidence hygiene** — screenshots leaked cookies and victim PII
-
-**External red-team engagement** — exposed five additional gaps that bug-bounty defaults made worse:
-
-1. **Conservative defaults retracted real findings** — WAPT mindset stopped tests early on defended targets where red-team continuation would have surfaced bypass chains → `redteam-mindset`
-2. **No mid-engagement situational awareness** — client SOC patched confirmed SQLi within 30 min; external attacker locked 14 accounts during a live test session — both invisible without explicit detection methodology → `mid-engagement-ir-detection`
-3. **No enterprise-platform attack chains** — M365 + Entra ID, on-prem SharePoint, Cisco SSL VPN, vCenter, and 7 Android APKs all needed current 2024-2026 CVE knowledge and platform-specific tradecraft → `m365-entra-attack`, `okta-attack`, `hunt-sharepoint`, `hunt-aspnet`, `hunt-ntlm-info`, `vmware-vcenter-attack`, `enterprise-vpn-attack`, `apk-redteam-pipeline`
-4. **No client-facing deliverable format** — bug-bounty report templates don't fit enterprise red-team where output is a 50KB+ MD + DOCX with embedded screenshots → `redteam-report-template`
-5. **No post-credential escalation model** — when recon yielded credentials (AWS keys, JWTs, GCP JSON), it was unclear what they granted or how to escalate → `cloud-iam-deep`
-
-The per-class `hunt-*` skills address gap-zero (*"what should I look for in webapps"*) — the original 24 codifying patterns from 681 disclosed HackerOne reports, with 20+ framework/surface skills added by the community v3 expansion — Claude knows the actual chain templates real triagers paid for, not abstract OWASP Top 10. The enterprise-platform and red-team-tradecraft layers address what bug-bounty alone cannot: external red-team engagements against monitored enterprise targets.
-
----
-
-## Roadmap
-
-- [ ] HackerOne MCP integration (currently only Burp MCP wired in)
-- [ ] Per-engagement memory layer — pattern recall across targets
-- [x] Industry-specific hunt skills — `hunt-fintech-graphql` shipped; `hunt-healthcare-fhir`, `hunt-gov-compliance` still open
-- [ ] Program-rules-parser skill — auto-generate structured `scope.md` from program text
-- [ ] Refresh `hunt-*` skills with newer disclosed reports (re-run `public-skills-builder`)
-- [ ] Additional enterprise-platform skills — `citrix-netscaler-deep`, `f5-bigip-attack`, `ad-cs-attack` (AD Certificate Services)
-- [ ] Refresh enterprise-VPN CVE matrix quarterly to track 2026 advisories
-- [ ] Update architecture SVG to include the 7-skill enterprise-platform layer
-
----
-
-## Sponsors
-
-<p align="center">
-  <a href="https://www.atlascloud.ai/console/coding-plan"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/atlas-cloud-dark.svg">
-    <img alt="Atlas Cloud" src="assets/sponsors/atlas-cloud-light.svg" width="340">
-  </picture></a>
-</p>
-
-**[Atlas Cloud](https://www.atlascloud.ai/console/coding-plan)** is a full-modal AI inference platform that gives developers a single AI API to access video generation, image generation, and LLM APIs. Instead of managing multiple vendor integrations, you connect once and get unified access to 300+ curated models across all modalities.
-
-Check out Atlas Cloud's new coding plan promotion for more budget-friendly API access: **<https://www.atlascloud.ai/console/coding-plan>**
-
-
-
-<p align="center">
-  <a href="https://threatwatch360.com"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/tw360-dark.svg">
-    <img alt="ThreatWatch360" src="assets/sponsors/tw360-light.svg" width="430">
-  </picture></a>
-</p>
-
-**[ThreatWatch360](https://threatwatch360.com)** is an AI-powered offensive-security platform: continuous Attack Surface Management, AI-assisted penetration testing, brand protection, dark-web monitoring, and Cyber Threat Intelligence in one platform. Validated findings with proof-of-concept and business-impact prioritization — signal over alert fatigue.
-
-
----
-
-## About
-
-Operational tradecraft accumulated across bug-bounty engagements and authorized pentests, codified into Claude skills. Platform-agnostic — slot into any engagement workflow you already use, or none.
-
-**Author:** [ElementalSoul](https://github.com/elementalsouls) · GenAI Security Research
-
-**Sister project:** [Claude-OSINT](https://github.com/elementalsouls/Claude-OSINT) — paired skills for the recon phase that this bundle picks up after. Its two recon skills (`offensive-osint`, `osint-methodology`) are **canonically maintained here** and re-exported there, so the two are byte-identical. **Installing both is safe:** each bundle's installer (`install.sh` on macOS/Linux, `install.ps1` on Windows) records a manifest, the script skips re-copying an identical skill, and `--uninstall` keeps any skill the other bundle still owns — uninstalling one never breaks the other.
-
-**Vendored foundation:** [shuvonsec/claude-bug-bounty](https://github.com/shuvonsec/claude-bug-bounty) — methodology, validation, reporting, payload library (8 of 84 skills + 15 slash commands)
-
-**Generator tool used (not vendored):** [shuvonsec/public-skills-builder](https://github.com/shuvonsec/public-skills-builder) — used to scaffold per-class skills from H1 disclosed reports
-
-**Inspirations:**
-- [archangel / douglasday](https://hackerone.com/) — top-10 H1 hunter; per-class skill pattern
-- [Trail of Bits — `trailofbits/skills`](https://github.com/trailofbits/skills) — skill-authoring discipline
-- [SecSkills — `trilwu/secskills`](https://github.com/trilwu/secskills) — subagent pattern
-
-**Tool inventory:**
-- [PortSwigger Burp Suite + MCP Server extension](https://portswigger.net/burp)
-- [ProjectDiscovery](https://github.com/projectdiscovery) — subfinder · dnsx · httpx · katana · nuclei
-- [SecLists](https://github.com/danielmiessler/SecLists) · [Assetnote Wordlists](https://wordlists.assetnote.io/)
-
-## License
-
-This project is dual-licensed:
-
-- **Code** (Python helpers, shell scripts) — [MIT](LICENSE).
-- **Content** (skill methodology, wordlists, regex catalogs, severity rubrics, docs) — [Creative Commons Attribution 4.0 International](LICENSE-CONTENT) (CC BY 4.0).
-
-To be precise about the boundary: **`*.py`, `*.sh`, and other source files are MIT; `*.md` documentation, wordlists, regex catalogs, and rubrics are CC BY 4.0.**
-
-Reuse the content freely — including commercially — as long as you credit **Sachin Sharma / Claude-BugHunter** and link back to this repository. See [`NOTICE`](NOTICE) for upstream-skills attribution.
-
----
-
-> *"Give Claude the right skill and it stops being a chatbot. It becomes an operator."*
+When redistributing the content, retain the required upstream attribution and
+license notices.

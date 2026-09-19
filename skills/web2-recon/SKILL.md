@@ -614,7 +614,7 @@ Full attack-chain analysis is in `hunt-api-misconfig` → `NSwag / Swagger / Ope
 
 ---
 
-## Operator Notes (Claude-BugHunter)
+## Operator Notes (Codex-Bug-hunter)
 
 > Engagement-derived + 2026-specific additions to the vendored foundation.
 > Wisdom from real authorized engagements + Phase 2 verification across

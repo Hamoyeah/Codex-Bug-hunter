@@ -283,7 +283,7 @@ When you don't have source code, check on-chain:
 
 ---
 
-## Operator Notes (Claude-BugHunter)
+## Operator Notes (Codex-Bug-hunter)
 
 > Engagement-derived + 2026-specific additions to the vendored foundation.
 > Wisdom from real authorized engagements + Phase 2 verification across

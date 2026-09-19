@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-lint_skills.py — quality + safety gate for claude-bughunter skills.
+lint_skills.py — quality + safety gate for Codex-Bug-hunter skills.
 
 Enforces the rules documented in CONTRIBUTING.md and the repo's hard rule that
 NO real client/engagement identifiers ever land in the public tree.

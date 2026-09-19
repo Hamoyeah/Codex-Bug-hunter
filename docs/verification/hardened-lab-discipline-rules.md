@@ -2,7 +2,7 @@
 
 > This is the test that matters most. A custom Flask lab with **real defenses** (prepared statements, output encoding, rate limits) AND **intentional FP-shaped behaviors** (URL echoing without fetching, response-body reflection without DOM XSS, server-policy filters that look like file-existence oracles, noisy timing leaks).
 >
-> The lab is designed to fool a naive operator into filing 4+ N/A reports. The discipline rules in the Claude-BugHunter skill stack should prevent every one of those false claims while still surfacing the real bugs hidden in the lab.
+> The lab is designed to fool a naive operator into filing 4+ N/A reports. The discipline rules in the Codex-Bug-hunter skill stack should prevent every one of those false claims while still surfacing the real bugs hidden in the lab.
 >
 > Verdict: **8 / 8 tests fired the right discipline rule.** Every FP killed, every real bug found.
 

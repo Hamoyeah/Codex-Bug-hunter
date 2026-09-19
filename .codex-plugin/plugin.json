@@ -1,7 +1,7 @@
 {
-  "name": "claude-bughunter",
+  "name": "codex-bug-hunter",
   "version": "2.2.0",
-  "description": "Provider-neutral bug-hunting and external red-team skill bundle for Claude Code and OpenAI Codex.",
+  "description": "Codex-first bug-hunting and external red-team skill bundle with guarded workflows and deterministic tooling.",
   "author": {
     "name": "Sachin Sharma",
     "url": "https://github.com/elementalsouls"
@@ -12,7 +12,7 @@
   "keywords": ["security", "bug-bounty", "red-team", "codex", "agent-skills"],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Claude-BugHunter",
+    "displayName": "Codex-Bug-hunter",
     "shortDescription": "Authorized bug hunting and red-team workflows",
     "longDescription": "Agent Skills, deterministic tooling, and guarded workflows for authorized bug-bounty, WAPT, Web3, and external red-team engagements.",
     "developerName": "Sachin Sharma",

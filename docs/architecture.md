@@ -1,6 +1,6 @@
 # Architecture
 
-The Claude-BugHunter bundle maps to a 6-phase workflow that supports both bug hunting and external red-team engagements. Each phase has a focused set of skills; skills compose left-to-right as you move through the workflow, but you can jump in at any phase mid-engagement.
+The Codex-Bug-hunter bundle maps to a 6-phase workflow that supports both bug hunting and external red-team engagements. Each phase has a focused set of skills; skills compose left-to-right as you move through the workflow, but you can jump in at any phase mid-engagement.
 
 ## Primary view — phase-by-phase architecture
 

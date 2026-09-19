@@ -14,7 +14,7 @@ All **84 skills** in the bundle, grouped by domain. Each auto-loads when your pr
 
 | Skill | What it does | Reports |
 |---|---|---|
-| `bughunter` | Route authorized bug-bounty, WAPT, and external red-team work through Claude-BugHunter workflows in Codex or another Agent Skills client. | — |
+| `bughunter` | Route authorized bug-bounty, WAPT, and external red-team work through Codex-Bug-hunter workflows. | — |
 
 ## Hunt — web app vuln classes (58)
 

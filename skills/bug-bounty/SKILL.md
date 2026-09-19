@@ -1554,7 +1554,7 @@ The skill then loads automatically in either supported agent when you ask about 
 
 ---
 
-## Operator Notes (Claude-BugHunter)
+## Operator Notes (Codex-Bug-hunter)
 
 > Engagement-derived additions to the vendored foundation. Wisdom from real
 > authorized engagements + Phase 2 verification across this repo's 31+

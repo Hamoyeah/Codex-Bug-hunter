@@ -6,6 +6,15 @@ versioning is loosely [SemVer](https://semver.org/) at the bundle level.
 
 ## [Unreleased]
 
+### Changed
+- Rebranded the maintained distribution as **Codex-Bug-hunter** across the README,
+  banners, package metadata, plugin manifests, CLI output, skills, and operator docs.
+  Codex is now the documented primary runtime; Claude Code remains an optional
+  compatibility target with its original slash-command layer.
+- Added Codex UI metadata for the `$bughunter` router and renamed new install
+  manifests to `codex-bug-hunter.txt`. Uninstallers still recognize the legacy
+  `claude-bughunter.txt` manifest so existing installations can be removed safely.
+
 ## [2.2.0] - 2026-09-19
 
 ### Added
